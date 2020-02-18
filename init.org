@@ -2,12 +2,14 @@
 #      ~C-x C-s~ is a normal save; whereas
 #  ~C-u C-x C-s~ is a save after forming ~init.elc~ and ~README.md~.
 #
-# ≥ 7300 line org file, with auto-generated TOC.
-
-#+TITLE: A Life Configuring Emacs
-#+AUTHOR: Musa Al-hassy
-#+EMAIL: alhassy@gmail.com
-#+DATE: 2018-07-25
+# ≥ 7900 line org file, with auto-generated TOC.
+# ≥ 219 code blocks
+# (emacs-init-time) ⇒ 17.0 seconds
+#
+#+title: A Life Configuring Emacs
+#+author: Musa Al-hassy
+#+email: alhassy@gmail.com
+#+date: 2018-07-25
 #+DESCRIPTION: My Emacs Initialisation File, Written in Org-mode.
 #+STARTUP: indent lognoteclock-out
 #+OPTIONS: html-postamble:nil toc:nil d:nil num:nil :results nil
@@ -20,31 +22,9 @@
 #+CATEGORIES: Emacs Lisp
 
 * Abstract                                                           :ignore:
-
-# See https://shields.io/
-#
-# https://img.shields.io/badge/<LABEL>-<MESSAGE>-<COLOR>.svg
-#
-#+BEGIN_export html :tangle to-github?
-<p align="center"><img src="emacs-logo.png" width=150 height=150/></p>
-#+END_export
-#+begin_src emacs-lisp :tangle no :exports results :wrap "export html" :results replace
-(concat
-"<p align=\"center\">
-        <a href=\"https://www.gnu.org/software/emacs/\">
-        <img src=\"https://img.shields.io/badge/GNU%20Emacs-" emacs-version "-b48ead.svg?style=plastic\"/></a>
-        <a href=\"https://orgmode.org/\"><img src=\"https://img.shields.io/badge/org--mode-" org-version "-489a9f.svg?style=plastic\"/></a>
-</p>")
-#+end_src
-
-#+RESULTS:
-#+begin_export html
-<p align="center">
-        <a href="https://www.gnu.org/software/emacs/">
-        <img src="https://img.shields.io/badge/GNU%20Emacs-26.1-b48ead.svg?style=plastic"/></a>
-        <a href="https://orgmode.org/"><img src="https://img.shields.io/badge/org--mode-9.2.5-489a9f.svg?style=plastic"/></a>
-</p>
-#+end_export
+:PROPERTIES:
+:CUSTOM_ID: Abstract
+:END:
 
 #+html: <p align="center">
 #+begin_center text
@@ -67,6 +47,7 @@ the bindings in ~“this”~ configuration.
 + ~C-h o~ ⇒ *What's this thing?*
 + ~C-h e~ ⇒ *What'd /Emacs/ do?*
 + ~C-h l~ ⇒ *What'd /I/ do?*
++ ~C-h ?~ ⇒ *What're the help topics?* ---gives possible completions to “C-h ⋯”.
 + “I accidentally hit a key, which one and what did it do!?” ⇒ ~C-h e~ and ~C-h l~,
   then use ~C-h o~ to get more details on the action.
   ;-)
@@ -76,7 +57,18 @@ After providing a few keywords, the =apropos= tool yields possible functions
 and variables that may accomplish my goal.
 
 * Table of Contents                                        :Github:TOC_4:
+:PROPERTIES:
+:CUSTOM_ID: Table-of-Contents
+:END:
 - [[#why-emacs][Why Emacs?]]
+  - [[#emacs-is-a-flexible-platform-for-developing-end-user-applications][/Emacs is a flexible platform for developing end-user applications/]]
+  - [[#the-power-of-text-manipulation][The Power of Text Manipulation]]
+  - [[#keyboard-navigation-and-alteration][Keyboard Navigation and Alteration]]
+  - [[#emacs-proverbs-as-koan][Emacs Proverbs as Koan]]
+  - [[#possibly-interesting-reads][Possibly Interesting Reads]]
+  - [[#fun-commands-to-try-out][Fun commands to try out]]
+  - [[#what-does-literate-programming-look-like][What Does Literate Programming Look Like?]]
+  - [[#why-a-monolithic-configuration][Why a monolithic configuration?]]
 - [[#booting-up][Booting Up]]
   - [[#emacs-vs-initorg][=~/.emacs= vs. =init.org=]]
     - [[#adventure-time-honey-wheres-my-init][/Adventure time!/ “Honey, where's my init?”]]
@@ -98,30 +90,37 @@ and variables that may accomplish my goal.
   - [[#who-am-i----using-gnus-for-gmail][Who am I? ---Using Gnus for Gmail]]
     - [[#prettifications][Prettifications]]
     - [[#super-terse-tutorial][Super Terse Tutorial]]
+    - [[#capturing-mail-as-todonotes][Capturing Mail as Todo/Notes]]
     - [[#auto-completing-mail-addresses][Auto-completing mail addresses]]
     - [[#feeds-to-blogs][Feeds to Blogs]]
+  - [[#jumping-to-extreme-semantic-units][Jumping to extreme semantic units]]
   - [[#hydra-supply-a-prefix-only-once][Hydra: Supply a prefix only once]]
+    - [[#textual-navigation----look-ma-no-ctrl-key][Textual Navigation ---“Look Ma, no CTRL key!”]]
+    - [[#window-navigation][Window Navigation]]
   - [[#quickly-pop-up-a-terminal-run-a-command-close-it----and-zsh][Quickly pop-up a terminal, run a command, close it ---and zsh]]
   - [[#restarting-emacs----keeping-buffers-open-across-sessions][Restarting Emacs ---Keeping buffers open across sessions?]]
   - [[#automatic-backups][Automatic Backups]]
+  - [[#screencapturing-the-current-emacs-frame][Screencapturing the Current Emacs Frame]]
   - [[#editor-documentation-with-contextual-information][Editor Documentation with Contextual Information]]
 - [[#cosmetics][Cosmetics]]
   - [[#startup-message-emacs--org-versions][Startup message: Emacs & Org versions]]
   - [[#my-to-do-list-the-initial-buffer-when-emacs-opens-up][My to-do list: The initial buffer when Emacs opens up]]
   - [[#exquisite-themes][Exquisite Themes]]
   - [[#a-sleek--informative-mode-line][A sleek & informative mode line]]
+  - [[#powerful-directory-editing-with-dired][Powerful Directory Editing with ~dired~]]
+    - [[#neotree-traditional-directory-tree-navigation][Neotree: Traditional Directory Tree Navigation]]
   - [[#never-lose-the-cursor][Never lose the cursor]]
   - [[#dimming-unused-windows][Dimming Unused Windows]]
   - [[#buffer-names-are-necessarily-injective][Buffer names are necessarily injective]]
   - [[#flashing-when-something-goes-wrong----no-blinking][Flashing when something goes wrong ---no blinking]]
   - [[#hiding-scrollbar-tool-bar-and-menu][Hiding Scrollbar, tool bar, and menu]]
   - [[#highlight--complete-parenthesis-pair-when-cursor-is-near--][Highlight & complete parenthesis pair when cursor is near ;-)]]
-  - [[#neotree-directory-tree-listing][Neotree: Directory Tree Listing]]
   - [[#tabs][Tabs]]
   - [[#window-resizing-using-the-golden-ratio][Window resizing using the golden ratio]]
   - [[#persistent-scratch-buffer][Persistent Scratch Buffer]]
 - [[#prose][Prose]]
   - [[#fill-mode----word-wrapping][Fill-mode ---Word Wrapping]]
+  - [[#pretty-lists-markers][Pretty Lists Markers]]
   - [[#word-completion][Word Completion]]
   - [[#fix-spelling-as-you-type----thesaurus--dictionary-too][Fix spelling as you type ---thesaurus & dictionary too!]]
   - [[#touch-typing][Touch Typing]]
@@ -147,6 +146,7 @@ and variables that may accomplish my goal.
     - [[#c-aek-and-yanking-of-sections][~C-a,e,k~ and Yanking of sections]]
   - [[#hiding-emphasise-markers--inlining-images][Hiding Emphasise Markers & Inlining Images]]
   - [[#org-emphasise-for-parts-of-words][Org-Emphasise for Parts of Words]]
+  - [[#proportional-fonts-for-headlines][Proportional fonts for Headlines]]
   - [[#show-off-screen-heading-at-the-top-of-the-window][Show off-screen heading at the top of the window]]
   - [[#jumping-without-hassle][Jumping without hassle]]
   - [[#folding-within-a-subtree][Folding within a subtree]]
@@ -154,10 +154,11 @@ and variables that may accomplish my goal.
   - [[#org-modes-𝒳-block-expansions][Org-mode's ~<𝒳~ Block Expansions]]
 - [[#org-mode--pdf--html][Org-Mode ⇒ PDF & HTML]]
   - [[#working-with-citations][Working with Citations]]
-  - [[#coloured-latex-using-minted][Coloured LaTeX using Minted]]
+  - [[#bibliography--coloured-latex-using-minted][Bibliography & Coloured LaTeX using Minted]]
   - [[#ensuring-useful-html-anchors][Ensuring Useful HTML Anchors]]
   - [[#html-folded-drawers][HTML “Folded Drawers”]]
   - [[#revealjs----the-html-presentation-framework][Reveal.JS -- The HTML Presentation Framework]]
+  - [[#org-mode--html][Org-mode ⇐ HTML]]
 - [[#life-within-org-mode][Life within Org-mode]]
   - [[#using-org-mode-as-a-day-planner][Using Org-Mode as a Day Planner]]
     - [[#capturing-ideas--notes-without-interrupting-the-current-workflow][Capturing ideas & notes without interrupting the current workflow]]
@@ -168,20 +169,30 @@ and variables that may accomplish my goal.
     - [[#step-5-doing-the-work][Step 5: Doing the work]]
     - [[#step-6-moving-a-task-toward-completion][Step 6: Moving a task toward completion]]
     - [[#step-7-archiving-tasks][Step 7: Archiving Tasks]]
+  - [[#tag-youre-it][Tag! You're it!]]
+  - [[#pretty-prioritisation-markers][Pretty Prioritisation Markers]]
   - [[#super-agenda][Super Agenda]]
   - [[#automating-pomodoro----commit-for-only-25-minutes][Automating Pomodoro ---“Commit for only 25 minutes!”]]
   - [[#journaling][Journaling]]
+    - [[#the-setup][The Setup]]
+    - [[#super-terse-tutorial-1][Super Terse Tutorial]]
+    - [[#guided-journaling][Guided Journaling]]
   - [[#workflow-states][Workflow States]]
   - [[#clocking-work-time][Clocking Work Time]]
     - [[#finding-tasks-to-clock-in][Finding tasks to clock in]]
     - [[#estimates-versus-actual-time][Estimates versus actual time]]
+  - [[#habit-formation][Habit Formation]]
+  - [[#actually-doing-things][Actually Doing Things]]
 - [[#programming][Programming]]
+  - [[#which-function-are-we-writing][Which function are we writing?]]
   - [[#highlight-defined-lisp-symbols][Highlight defined Lisp symbols]]
   - [[#eldoc-for-lisp-and-haskell][Eldoc for Lisp and Haskell]]
   - [[#jumping-to-definitions--references][Jumping to definitions & references]]
-  - [[#aggressive-indentation][Aggressive Indentation]]
+  - [[#version-control-with-svn----using-magit][Version Control with SVN ---Using Magit!]]
   - [[#whats-changed--whos-to-blame][What's changed & who's to blame?]]
   - [[#highlighting-todo-s--showing-them-in-magit][Highlighting TODO-s & Showing them in Magit]]
+  - [[#aggressive-indentation][Aggressive Indentation]]
+  - [[#being-generous-with-whitespace][Being Generous with Whitespace]]
   - [[#on-the-fly-syntax-checking][On the fly syntax checking]]
   - [[#coding-with-a-fruit-salad-semantic-highlighting][Coding with a Fruit Salad: Semantic Highlighting]]
   - [[#text-folding-with-origami-mode][Text Folding with Origami-mode]]
@@ -190,6 +201,8 @@ and variables that may accomplish my goal.
     - [[#org-mode-templates----a-reason-i-generate-templates-][Org-mode Templates ---A reason I “generate” templates ;)]]
     - [[#elisp-templates][Elisp Templates]]
     - [[#equational-templates][Equational Templates]]
+    - [[#my_-templates-to-obtain-user-information][=my_⋯= Templates to obtain User Information]]
+    - [[#templates-from-other-places-in-my-init][Templates from other places in my init]]
     - [[#re-enabling-templates][Re-Enabling Templates]]
 - [[#helpful-utilities--shortcuts][Helpful Utilities & Shortcuts]]
   - [[#documentation-pop-ups][Documentation Pop-Ups]]
@@ -205,10 +218,12 @@ and variables that may accomplish my goal.
 
 * Why Emacs?
 :PROPERTIES:
-
+:CUSTOM_ID: Why-Emacs
 :END:
 
-/Emacs is a flexible platform for developing end-user applications/ --unfortunately it is generally perceived as
+** Intro :ignore:
+
+/Emacs is a flexible platform for developing end-user applications/ ---unfortunately it is generally perceived as
 merely a text editor. Some people use it specifically for one or two applications.
 
 For example, [[https://www.youtube.com/watch?v=FtieBc3KptU][writers]] use it as an interface for Org-mode and others use it as an interface for version
@@ -224,6 +239,28 @@ in approximately the same way that the noonday sun does the stars.
 It is not just bigger and brighter; it simply makes everything else vanish.
 —[[http://project.cyberpunk.ru/lib/in_the_beginning_was_the_command_line/][Neal Stephenson]], /In the beginning was the command line/
 #+end_quote
+
+  + Extensible ⇒ IDEs are generally optimised for one framework, unlike Emacs!
+      # Emacs is a live interpreter for ELisp.
+    - You can /program/ Emacs to /automate/ anything you want.
+      # Even arrow keys and characters can be customised, via self-insert-command!
+    - Hence, it's an /environment/, not just an editor.
+    - ⇒ Unified keybinding across all tools in your environment.
+
+    Users are given a high-level full-featured programming language,
+    not just a small configuration language. For the non-programmers,
+    there is Custom, a friendly point-and-click customisation interface.
+    # with support for a large portion of Common Lisp
+  + Self Documented ⇒ Simply ~M-x info-apropos~ or ~C-h d~ to search all manuals or
+    look up any function provided by Emacs!
+  + [[https://en.wikipedia.org/wiki/Emacs#History][Mature]] ⇒ tool with over 40 years of user created features
+    - Plugins for nearly everything!
+    - No distinction between built-ins and user-defined features! (Lisp!)
+    - You can alter others' code [[https://www.gnu.org/software/emacs/manual/html_node/elisp/Advising-Functions.html][without even touching the source]].
+      * Advising functions and ‘hooking’ functionality onto events.
+  + [[https://www.gnu.org/philosophy/free-sw.html][Free software]] ⇒ It will never die!
+    - Emacs is one of the oldest open source projects still under developement.
+    # - Unlike other certain editors, Emacs' source is completely open.
 
 Of course Emacs comes with the basic features of a text editor, but it is much more;
 for example, it comes with a powerful notion of ‘undo’: Basic text editors have a single stream of undo,
@@ -282,9 +319,97 @@ be seen by me.
 #+end_quote
 # Comparing Emacs to an editor is like comparing GNU/Linux to a word processor. -- [[https://karl-voit.at/2015/10/23/Emacs-is-not-just-an-editor/][Karl Voit]]
 
-Possibly interesting reads:
+** /Emacs is a flexible platform for developing end-user applications/
+Just as a web browser is utilised as a platform for deploying applications,
+   or ‘extensions’, written in JavaScript that act on HTML documents, Emacs is a
+   platform for deploying applications written in Emacs Lisp that act on buffers
+   of text.  In the same vein, people who say Emacs having Tetris is bloat are
+   akin to non-coders who think their browser has bloat since it has a “view
+   page source” feature ---which nearly all browsers have, yet it's only useful
+   to web developers. Unlike a web browser in which the user must get accustomed
+   to its features, Emacs is customised to meet the needs of its user.  (
+   Incidentally, Emacs comes bundled with a web browser. )
+
+   #+begin_quote
+   In the case of Emacs the boundary between user and programmer is blurred as
+   adapting the environment to one’s needs is [[https://www.gnu.org/software/emacs/emacs-paper.html][already an act of programming with
+   a very low barrier to entry.]]    ---[[https://elephly.net/posts/2016-02-14-ilovefs-emacs.html][rekado]]
+   #+END_quote
+
+   + Don't just get used to your tool, make it get used to you!
+
+   Emacs is not just an editor, but a host for running Lisp applications!
+
+   For example, Emacs is shipped as a language-specific IDE to a number of
+   communities ---e.g., Oz, Common Lisp, and, most notably, Agda.  Emacs is a
+   great IDE for a language ---one just needs to provide a ‘major mode’ and will
+   then have syntax highlighting, code compleition, jumping to definitions, etc.
+   There is no need to make an IDE from scratch.
+
+** The Power of Text Manipulation
+ Emacs has ways to represent all kinds of information as text.
+
+ E.g., if want to make a regular expression rename of files in a directory,
+ there's no need to learn about a batch renaming tool: ~M-x dired <RET> M-x wdired-change-to-wdired-mode~ now simply perform a /usual/ find-and-replace, then
+ save with the /usual/ ~C-x C-s~ to effect the changes!
+
+ Likewise for other system utilities and services (•̀ᴗ•́)و
+
+Moreover, as will be shown below, you can literally use [[https://github.com/zachcurry/emacs-anywhere/#usage][Emacs anywhere]]
+for textually input in your operating system --no copy-paste required.
+
+** Keyboard Navigation and Alteration
+
+Suppose you wrote a paragraph of text, and
+wanted to ‘border’ it up for emphasies in hypens. Using the mouse to navigate
+along with a copy-paste of the hypens is vastely inferior to the incantation ~M-{
+C-u 80 - RET M-} C-u 80 - RET~.  If we want to border up the previous 𝓃-many
+paragraphs, we simply prefix ~M-{,}~ above with ~C-u 𝓃~ ---a manual approach would
+have us count 𝓃 and slowly scroll.  ( Exercise: What incantation of keys
+‘underlines’ the current line with /only/ the necessary amount of dashes?
+---Solution in the source file. )
+# =C-a C-k C-y RET C-y C-SPC C-a C-M-% . RET - RET !=
+
+⇒ [[https://support.apple.com/en-ca/HT201236][MacOS supports]] many Emacs shortcuts, system-wide, such as ~C-a/e, C-d, C-k/y,
+ C-o, C-p/n~ and even ~C-t~ for transposing two characters.  ⇐
+
+** Emacs Proverbs as Koan
+
+Below is an extract from William Cobb's “Reflections on the Game of Go”, with
+minor personalised adjustements for Emacs. Enjoy!
+
+The Japanese term /satori/ refers to the experience of enlightenment, the
+realisation of how things really are that is the primary aim of practice and
+meditation. However, the Zen tradition is famous for claiming that one cannot
+say what it is that one realises, that is, one cannot articulate the content of
+the enlightenment experience. Although it makes everything clear, it is an experience
+beyond words. Instead of being given an explanation of how things are, the student of
+Zen hears sayings called /koan/, often somewhat paradoxical in character, that come
+from those who are enlightened:
+
++ “There are no CTRL and META.”
++ “If you meet an Emacs you dislike, kill it.”
++ “No one knows Emacs.”
++ “One can only learn Emacs by living within it.”
++ “To know Org mode is to know oneself.”
+
+It is important to realise that /koan/ are intended to move you off of one path
+and onto another. They are not just attempts to mystify you. For example,
+the first proverb is in regards to newcomers complaining about too many
+keybinings ---eventually it's muscle memory---, whereas the second is about
+using the right tool for the right task ---Emacs is not for everyone. The fourth
+is, well, Emacs is an operating system.
+
+** Possibly Interesting Reads
++ [[https://www.gnu.org/software/emacs/tour/][The Emacs Tour]]
 + [[https://sachachua.com/blog/series/a-visual-guide-to-emacs/][How to Learn Emacs: A Hand-drawn One-pager for Beginners / A visual tutorial]]
 + [[http://emacsrocks.com/][Video Series on Why Emacs Rocks]] ---catch the enthusiasm!
++ [[https://www.gnu.org/software/emacs/emacs-paper.html][EMACS: The Extensible, Customizable Display Editor]]
+     # - This paper was written by Richard Stallman in 1981 and delivered in the
+     #  ACM Conference on Text Processing.
+     “The programmable editor is an outstanding opportunity to learn to program!”
++ [[https://www.gnu.org/philosophy/free-sw.html][What is free software?]]
+   # + Link to emacs main site, [[https://www.gnu.org/software/emacs/][Emacs]] .
 + [[http://ehneilsen.net/notebook/orgExamples/org-examples.html#sec-18][Emacs org-mode examples and cookbook]]
 + [[https://m00natic.github.io/emacs/emacs-wiki.html][An Opinionated Emacs guide for newbies and beyond]]
 + [[https://tuhdo.github.io/emacs-tutor.html][Emacs Mini-Manual, Part I of III]]
@@ -316,38 +441,130 @@ computer languages that hinder your ability to craft code, but you put up with
 editors that bind your fingers to someone else’s accepted practice. ---[[http://www.howardism.org/Technical/Emacs/why-emacs.html][Howard
 Abrams]]
 #+end_quote
-
- *The Power of Text Manipulation:*
- Emacs has ways to represent all kinds of information as text.
-
- E.g., if want to make a regular expression rename of files in a directory,
- there's no need to learn about a batch renaming tool: ~M-x dired <RET> M-x wdired-change-to-wdired-mode~ now simply perform a /usual/ find-and-replace, then
- save with the /usual/ ~C-x C-s~ to effect the changes!
-
- Likewise for other system utilities and services (•̀ᴗ•́)و
-
-Moreover, as will be shown below, you can literally use [[https://github.com/zachcurry/emacs-anywhere/#usage][Emacs anywhere]]
-for textually input in your operating system --no copy-paste required.
-
-*Keyboard Navigation and Alteration* Suppose you wrote a paragraph of text, and
-wanted to ‘border’ it up for emphasies in hypens. Using the mouse to navigate
-along with a copy-paste of the hypens is vastely inferior to the incantation ~M-{
-C-u 80 - RET M-} C-u 80 - RET~.  If we want to border up the previous 𝓃-many
-paragraphs, we simply prefix ~M-{,}~ above with ~C-u 𝓃~ ---a manual approach would
-have us count 𝓃 and slowly scroll.  ( Exercise: What incantation of keys
-‘underlines’ the current line with /only/ the necessary amount of dashes?
----Solution in the source file. )
-# =C-a C-k C-y RET C-y C-SPC C-a C-M-% . RET - RET !=
-
+** Fun commands to try out
 Finally, here's some fun commands to try out:
 + ~M-x doctor~ ---generalising the idea of rubber ducks
 + ~M-x tetris~  or ~M-x gomoku~ or ~M-x snake~---a break with a classic
   - ~C-u 𝓃 M-x hanoi~ for the 𝓃-towers of Hanoi
 + ~M-x butterfly~ ---in reference to [[https://xkcd.com/378/][“real programmers”]]
 
-Before we get started…
+# Then, ~M-x help-with-tutorial~ or ~C-h t~ to start the ~30 min tutorial.
 
-*Why a monolithic configuration?*
+A neat way to get started with Emacs is to solve a problem you have, such
+as taking notes or maintaining an agenda ---both with Org-mode.
+
+Before we get started…
+** What Does Literate Programming Look Like?
+
+Briefly put, literate programming in Emacs allows us to evaluate source code
+within our text files, then using the results as values in other source
+blocks. When presenting an algorithm, we can talk it out, with a full commentary
+thereby providing ‘reproducible research’: Explorations and resulting algorithms
+are presented together in a natural style.
+
+#+html: <p style="text-align:center">
+#+begin_src plantuml :file images/literate-programming.png :tangle no :exports results :eval never-export :results (progn (org-display-inline-images t t) "replace")
+skinparam defaultTextAlignment center  /' Text alignment '/
+
+skinparam titleBorderRoundCorner 15
+skinparam titleBorderThickness 2
+skinparam titleBorderColor red
+skinparam titleBackgroundColor Aqua-CadetBlue
+title Literate Programming with Org-Mode
+
+actor You
+
+You --> (Code) : Ideas
+You --> (Text) : Ideas
+
+[**Org Mode**] as Org
+
+(Text) --> Org : Writing
+(Code) --> Org : Writing
+
+Org --[#green]> (Document) : ‘Weaving’
+Org --[#green]> (RawCode)  : ‘Tangeling’
+
+database Computer as "**Computer**
+---
+interpreter
+---
+compiler"
+
+cloud People {
+:jasim:
+:kathy:
+}
+
+(Document) --[#green]> People : PDF, HTML, Text
+(RawCode) --[#green]> (Computer) : tex, java, c, py
+
+center footer  ♥‿♥ Write once, generate many (•̀ᴗ•́)و
+#+end_src
+#+RESULTS:
+[[file:images/literate-programming.png]]
+#
+# (org-display-inline-images t t)
+⟨ This image was created in org-mode; details [[#Workflow-States][below]] or by looking at the source file 😉 ⟩
+#+html: </p>
+
+Here's an example of showing code in a natural style, but having the resulting
+code appear in a style amicable to a machine. *Here's what you type:*
+#+BEGIN_example org :tangle no
+It's natural to decompose large problems,
+#+begin_src haskell :noweb-ref defn-of-f :tangle no
+f = h ∘ g
+#+end_src
+
+But we need to define $g$ and $h$ /beforehand/ before we can use them. Yet it's
+natural to “motivate” their definitions ---rather than pull a rabbit out of
+hat. Org-let's us do that!
+
+Here's one,
+#+begin_src haskell :noweb-ref code-from-other-places :tangle no
+g = ⋯
+#+end_src
+
+then the other.
+#+begin_src haskell :noweb-ref code-from-other-places :tangle no
+h = ⋯
+#+end_src
+
+Of-course, we might also want a preamble:
+#+BEGIN_SRC haskell :tangle myprogram.hs
+import ⋯
+#+END_SRC
+
+We can now tangle together the tagged code blocks in the order we want.
+#+BEGIN_SRC haskell :tangle myprogram.hs :comments none :noweb yes
+<<code-from-other-places>>
+<<defn-of-f>>
+#+END_SRC
+#+END_example
+
+Now ~C-c C-v C-t~ yields a file named ~myprogram.hs~ with contents in an order
+amicable to a machine.
+#+BEGIN_SRC haskell :tangle no
+import ⋯
+
+g = ⋯
+h = ⋯
+f = h ∘ g
+#+END_SRC
+Interestingly, unlike certain languages, Haskell doesn't care too much about
+declaration order.
+
+*Warning!* If we have different language blocks tangled to the same file, then
+they are tangled alphabetically ---e.g., if one of the blocks is marked
+~emacs-lisp~ then its contents will be the very first one in the resulting source
+file, since ~emacs-lisp~ begins with ~e~ which is alphabetically before ~h~ of
+~haskell~.
+
++ [[http://www.howardism.org/Technical/Emacs/literate-programming-tutorial.html][Introduction to Literate Programming with Org-mode]]
++ [[http://ehneilsen.net/notebook/orgExamples/org-examples.html][Emacs org-mode examples and cookbook]]
++ [[https://leanpub.com/lit-config/read][Literate Config]] ---Online booklet
+
+** Why a monolithic configuration?
 
 Why am I keeping my entire configuration ---from those involving cosmetics &
 prose to those of agendas & programming--- in one file?  Being monolithic ---“a
@@ -381,7 +598,7 @@ one. ( Upon an initial startup using this configuration, it takes a total of
 
 * Booting Up
 :PROPERTIES:
-
+:CUSTOM_ID: Booting-Up
 :END:
 
 Let's decide on where we want to setup our declarations for personalising Emacs
@@ -392,10 +609,7 @@ we are and use that to setup Emacs email service.
 
 ** =~/.emacs= vs. =init.org=
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: emacs-vs-init-org
 :END:
 
 /Emacs is extenible/: When Emacs is started, it tried to load a user's Lisp
@@ -439,6 +653,9 @@ discussed in great detail later on.
 
 *** /Adventure time!/ “Honey, where's my init?”
 :PROPERTIES:
+:CUSTOM_ID: Adventure-time-Honey-where's-my-init
+:END:
+:PROPERTIES:
 
 :END:
 :PROPERTIES:
@@ -472,6 +689,9 @@ affect your editor. Delete some of these files in-order for others to take effec
 
 *** /Adventure time!/ Using Emacs' Easy Customisation Interface
 :PROPERTIES:
+:CUSTOM_ID: Adventure-time-Using-Emacs'-Easy-Customisation-Interface
+:END:
+:PROPERTIES:
 
 :END:
 :PROPERTIES:
@@ -491,10 +711,7 @@ Execute the following to see additions to the ~~/.emacs~ have been added by
 
 *** Support for ‘Custom’
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Support-for-Custom
 :END:
 
 Let the Emacs customisation GUI insert configurations into its own file, not
@@ -503,7 +720,7 @@ variables to produce ~README.org~'s and other matters, so Emacs' Custom utility
 will remember to not prompt me each time for the safety of such local variables.
 #+begin_src emacs-lisp
 (setq custom-file "~/.emacs.d/custom.el")
-(load custom-file)
+(ignore-errors (load custom-file)) ;; It may not yet exist.
 #+end_src
 
 Speaking of local variables, let's always ones we've already marked as safe
@@ -515,10 +732,7 @@ Speaking of local variables, let's always ones we've already marked as safe
 
 ** =use-package= ---The start of =init.el=
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: use-package-The-start-of-init-el
 :END:
 
 There are a few ways to install packages ---run ~C-h C-e~ for a short overview.
@@ -552,8 +766,7 @@ reposistories of developers]], rather than having all packages in one repository
 ;; Internet repositories for new packages.
 (setq package-archives '(("org"       . "http://orgmode.org/elpa/")
                          ("gnu"       . "http://elpa.gnu.org/packages/")
-                         ("melpa"     . "http://melpa.org/packages/")
-                         ("melpa-stable" . "http://stable.melpa.org/packages/")))
+                         ("melpa"     . "http://melpa.org/packages/")))
 
 ;; Actually get “package” to work.
 (package-initialize)
@@ -616,8 +829,7 @@ We now bootstrap ~use-package~.
 #+BEGIN_SRC emacs-lisp
 (unless (package-installed-p 'use-package)
   (package-install 'use-package))
-
-(eval-when-compile (require 'use-package))
+(require 'use-package)
 #+END_SRC
 
 We can now invoke ~(use-package XYZ :ensure t)~ which should check for the ~XYZ~
@@ -633,6 +845,7 @@ The use of ~:ensure t~ only installs absent modules, but it does no updating.
 Let's set up [[https://github.com/rranelli/auto-package-update.el][an auto-update mechanism]].
 #+BEGIN_SRC emacs-lisp
 (use-package auto-package-update
+  :defer 10
   :config
   ;; Delete residual old versions
   (setq auto-package-update-delete-old-versions t)
@@ -650,6 +863,7 @@ commands I did not know about! Neato :-)
 ;; Making it easier to discover Emacs key presses.
 (use-package which-key
   :diminish
+  :defer 5
   :config (which-key-mode)
           (which-key-setup-side-window-bottom)
           (setq which-key-idle-delay 0.05))
@@ -662,7 +876,7 @@ shown to us in the modeline ---the area near the bottom of Emacs.  It does so by
 using the ~diminish~ package, so let's install that.
 #+begin_src emacs-lisp
 (use-package diminish
-  :demand t
+  :defer 5
   :config ;; Let's hide some markers.
     (diminish  'org-indent-mode))
 #+end_src
@@ -676,12 +890,9 @@ Here are other packages that I want to be installed onto my machine.
 (use-package magit
   :config (global-set-key (kbd "C-x g") 'magit-status))
 
-(use-package htmlize)
+(use-package htmlize :defer t)
 ;; Main use: Org produced htmls are coloured.
 ;; Can be used to export a file into a coloured html.
-
-;; Quick BibTeX references, sometimes.
-(use-package biblio)
 
 ;; Get org-headers to look pretty! E.g., * → ⊙, ** ↦ ◯, *** ↦ ★
 ;; https://github.com/emacsorphanage/org-bullets
@@ -689,7 +900,7 @@ Here are other packages that I want to be installed onto my machine.
   :hook (org-mode . org-bullets-mode))
 
 ;; Haskell's cool
-(use-package haskell-mode)
+(use-package haskell-mode :defer t)
 
 ;; Lisp libraries with Haskell-like naming.
 (use-package dash)    ;; “A modern list library for Emacs”
@@ -712,9 +923,21 @@ Let's activate it now, after ~use-package~ has been setup.
   <<undo-tree-setup>>
 #+END_SRC
 
+Finally, let's try our best to have a [[https://chris.beams.io/posts/git-commit/][useful & consistent commit log]]:
+#+begin_src emacs-lisp
+(defun my/git-commit-reminder ()
+  (insert "\n\n# The commit subject line ought to finish the phrase:
+# “If applied, this commit will ⟪your subject line here⟫.” ")
+  (beginning-of-buffer))
+
+(add-hook 'git-commit-setup-hook 'my/git-commit-reminder)
+#+end_src
+
+Super neat stuff!
+
 ** =README= ---From =init.org= to =init.el=
 :PROPERTIES:
-
+:CUSTOM_ID: README-From-init-org-to-init-el
 :END:
 
 Rather than manually extracting the Lisp code from this literate document each
@@ -724,49 +947,54 @@ case, ~C-x C-s~ is a normal save whereas ~C-u C-x C-s~ is a save after forming
 ~init.elc~ and ~README.md~.
 
 *** The =my/make-init-el-and-README= function
+:PROPERTIES:
+:CUSTOM_ID: The-my-make-init-el-and-README-function
+:END:
 
 We ‘hook on’ the following function to the usual save method
 that is associated with this file only.
 
 #+name: enable making init and readme
 #+begin_src emacs-lisp :eval never-export
-(defun my/make-init-el-and-README ()
-  "Tangle an el and a github README from my init.org."
-  (interactive "P") ;; Places value of universal argument into: current-prefix-arg
-  (when current-prefix-arg
-    (let* ((time      (current-time))
-           (_date     (format-time-string "_%Y-%m-%d"))
-           (.emacs    "~/.emacs")
-           (.emacs.el "~/.emacs.el"))
-      ;; Make README.org
-      (save-excursion
-        (org-babel-goto-named-src-block "make-readme") ;; See next subsubsection.
-        (org-babel-execute-src-block))
+  (defun my/make-init-el-and-README ()
+    "Tangle an el and a github README from my init.org."
+    (interactive "P") ;; Places value of universal argument into: current-prefix-arg
+    (when current-prefix-arg
+      (let* ((time      (current-time))
+             (_date     (format-time-string "_%Y-%m-%d"))
+             (.emacs    "~/.emacs")
+             (.emacs.el "~/.emacs.el"))
+        ;; Make README.org
+        (save-excursion
+          (org-babel-goto-named-src-block "make-readme") ;; See next subsubsection.
+          (org-babel-execute-src-block))
 
-      ;; remove any other initialisation file candidates
-      (ignore-errors
-        (f-move .emacs    (concat .emacs _date))
-        (f-move .emacs.el (concat .emacs.el _date)))
+        ;; remove any other initialisation file candidates
+        (ignore-errors
+          (f-move .emacs    (concat .emacs _date))
+          (f-move .emacs.el (concat .emacs.el _date)))
 
-      ;; Make init.el
-      (org-babel-tangle)
-      (byte-compile-file "~/.emacs.d/init.el")
-      (load-file "~/.emacs.d/init.el")
+        ;; Make init.el
+        (org-babel-tangle)
+        ;; (byte-compile-file "~/.emacs.d/init.el")
+        (load-file "~/.emacs.d/init.el")
 
-      ;; Acknowledgement
-      (message "Tangled, compiled, and loaded init.el; and made README.md … %.06f seconds"
-               (float-time (time-since time))))))
+        ;; Acknowledgement
+        (message "Tangled, compiled, and loaded init.el; and made README.md … %.06f seconds"
+                 (float-time (time-since time))))))
 
 (add-hook 'after-save-hook 'my/make-init-el-and-README nil 'local-to-this-file-please)
 #+end_src
 
 *** The Org-block named =make-readme=
+:PROPERTIES:
+:CUSTOM_ID: The-Org-block-named-make-readme
+:END:
 
 Where the following block has ~#+NAME: make-readme~ before it.  This source block
 generates the ~README~ for the associated Github repository.
 #+NAME: make-readme
 #+begin_src emacs-lisp :tangle no :export_never t
-;; Update the table of contents in this file.
 (save-buffer)
 (with-temp-buffer
     (insert
@@ -775,7 +1003,7 @@ generates the ~README~ for the associated Github repository.
      # Logos and birthday present painting
      ,#+HTML:" (s-collapse-whitespace (concat
     " <p align=\"center\">
-       <img src=\"emacs-logo.png\" width=150 height=150/>
+       <img src=\"images/emacs-logo.png\" width=150 height=150/>
      </p>
 
      <p align=\"center\">
@@ -785,7 +1013,7 @@ generates the ~README~ for the associated Github repository.
      </p>
 
      <p align=\"center\">
-       <img src=\"emacs-birthday-present.png\" width=200 height=250/>
+       <img src=\"images/emacs-birthday-present.png\" width=250 height=250/>
      </p>
     "))
 
@@ -815,7 +1043,15 @@ generates the ~README~ for the associated Github repository.
 Alternatively, evaluate the above source block with ~C-c C-c~ to produce a ~README~
 file.
 
+For the ‘badges’, see https://shields.io/.  The syntax above is structured:
+#+begin_example org
+https://img.shields.io/badge/<LABEL>-<MESSAGE>-<COLOR>.svg
+#+end_example
+
 *** ‘Table of Contents’ for Org vs. Github
+:PROPERTIES:
+:CUSTOM_ID: Table-of-Contents-for-Org-vs-Github
+:END:
 
 The above mentioned package [[https://github.com/snosov1/toc-org][toc-org]], which creates an up-to-date table of
 contents in an org file, at any heading tagged ~:TOC:~.  It's useful primarily for
@@ -826,11 +1062,11 @@ heading, and other TOC features. Unlike toc-org, org-make-toc uses property draw
 to designate TOC matter.
 #+BEGIN_SRC emacs-lisp
 (use-package toc-org
+  ;; Automatically update toc when saving an Org file.
+  :hook (org-mode . toc-org-mode)
   ;; Use both “:ignore_N:” and ":export_N:” to exlude headings from the TOC.
   :custom (toc-org-noexport-regexp
-           "\\(^*+\\)\s+.*:\\(ignore\\|noexport\\)\\([@_][0-9]\\)?:\\($\\|[^ ]*?:$\\)")
-  ;; Automatically update toc when saving an Org file.
-  :hook (org-mode . toc-org-mode))
+           "\\(^*+\\)\s+.*:\\(ignore\\|noexport\\)\\([@_][0-9]\\)?:\\($\\|[^ ]*?:$\\)"))
 #+END_SRC
 
 However, [[https://github.com/snosov1/toc-org/issues/54#issuecomment-363710561][toc-org produces broken links for numbered sections]].
@@ -888,6 +1124,9 @@ Precondition: offset < most-positive-fixnum; else we wrap to a negative number."
 ;; (my/org-replace-tree-contents "Table of Contents")
 #+END_SRC
 *** Alternate approaches to generating a README
+:PROPERTIES:
+:CUSTOM_ID: Alternate-approaches-to-generating-a-README
+:END:
 
 Github supports several markup languages, one of which is Org-mode.
   - It seems that Github uses [[https://github.com/bdewey/org-ruby][org-ruby]] to convert org-mode to html.
@@ -936,7 +1175,7 @@ file with =M-x org-md-export-to-markdown=.
 
 ** Installing Emacs packages directly from source
 :PROPERTIES:
-
+:CUSTOM_ID: Installing-Emacs-packages-directly-from-source
 :END:
 
 [[https://github.com/quelpa/quelpa-use-package][Quelpa]] allows us to build Emacs packages directly from source repositories.  It
@@ -948,6 +1187,7 @@ when we want to install a file from souce we use the keyword ~:quelpa~.
 # (quelpa '(discover-my-major :fetcher git :url "https://framagit.org/steckerhalter/discover-my-major.git"))
 #+BEGIN_SRC emacs-lisp
 (use-package quelpa
+  :defer 5
   :custom (quelpa-upgrade-p t "Always try to update packages")
   :config
   ;; Get ‘quelpa-use-package’ via ‘quelpa’
@@ -968,7 +1208,7 @@ now]
 
 ** =magit= ---Emacs' porcelain interface to gitq
 :PROPERTIES:
-
+:CUSTOM_ID: magit-Emacs'-porcelain-interface-to-gitq
 :END:
 
 Let's setup an Emacs ‘porcelain’ interface to git ---it makes working with
@@ -1049,10 +1289,10 @@ but this approach makes /discovering/ other commands easier.
 Below are the git repos I'd like to clone ---along with a function to do so
 quickly.
 #+begin_src emacs-lisp
-(use-package magit)
-
-;; Do not ask about this variable when cloning.
-(setq magit-clone-set-remote.pushDefault t)
+(use-package magit
+  :defer t
+  :custom ;; Do not ask about this variable when cloning.
+          (magit-clone-set-remote.pushDefault t))
 
 (cl-defun maybe-clone (remote &optional (local (concat "~/" (file-name-base remote))))
   "Clone a REMOTE repository if the LOCAL directory does not exist.
@@ -1157,17 +1397,14 @@ historic versions of a file. The following utility allows us to ~M-x
 git-timemachine~ on a file and use ~p/n/g/q~ to look at previous, next, goto
 arbitrary historic versions, or quit.
 #+BEGIN_SRC emacs-lisp
-(use-package git-timemachine)
+(use-package git-timemachine :defer t)
 #+END_SRC
 If we want to roll back to a previous version, we just ~write-file~ or ~C-x C-s~ as
 usual! The power of text!
 
 ** Syncing to the System's =$PATH=
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Syncing-to-the-System's-PATH
 :END:
 
 For one reason or another, on OS X it seems that an Emacs instance
@@ -1203,10 +1440,7 @@ See the [[https://github.com/purcell/exec-path-from-shell][exec-path-from-shell]
 :End:
 ** Installing OS packages, and automatically keeping my system up to data, from within Emacs
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Installing-OS-packages-and-automatically-keeping-my-system-up-to-data-from-within-Emacs
 :END:
 
 Sometimes Emacs packages depend on existing system binaries, ~use-package~ let's
@@ -1218,12 +1452,15 @@ us ensure these exist using the ~:ensure-system-package~ keyword extension.
 Let's obtain the extension.
 #+BEGIN_SRC emacs-lisp
 ;; Auto installing OS system packages
-(use-package use-package-ensure-system-package)
+(use-package use-package-ensure-system-package
+  :defer 5
+  :config (system-packages-update))
 
 ;; Ensure our operating system is always up to date.
 ;; This is run whenever we open Emacs & so wont take long if we're up to date.
 ;; It happens in the background ^_^
-(system-packages-update)
+;;
+;; After 5 seconds of being idle, after starting up.
 #+END_SRC
 
 After an update to Mac OS, one may need to [[https://emacs.stackexchange.com/questions/53026/how-to-restore-file-system-access-in-macos-catalina][restore file system access privileges
@@ -1252,7 +1489,7 @@ package's description, or ~TAB~ for the other features!
 
 #+BEGIN_SRC emacs-lisp
 ;; An Emacs-based interface to the package manager of your operating system.
-(use-package helm-system-packages)
+(use-package helm-system-packages :defer t)
 #+END_SRC
 
 The Helm counterpart is great for /discovarability/, whereas
@@ -1275,15 +1512,11 @@ window manager for macOS along the lines of xmonad.”
 ;; If the given system package doesn't exist; install it.
 (system-packages-ensure "amethyst")
 #+END_SRC
-
 Neato! Now I can live in Emacs even more ^_^
 
 ** “Being at the Helm” ---Completion & Narrowing Framework
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Being-at-the-Helm-Completion-Narrowing-Framework
 :END:
 
 Whenever we have a choice to make from a list, [[http://tuhdo.github.io/helm-intro.html][Helm]] provides possible
@@ -1383,7 +1616,10 @@ changes with ~C-c C-e~ and apply them by ~C-x C-s~.
   :bind  (("C-s"     . 'helm-swoop)           ;; search current buffer
           ("C-M-s"   . 'helm-multi-swoop-all) ;; Search all buffer
           ;; Go back to last position where ‘helm-swoop’ was called
-          ("C-S-s" . 'helm-swoop-back-to-last-point))
+          ("C-S-s" . 'helm-swoop-back-to-last-point)
+          ;; swoop doesn't work with PDFs, use Emacs' default isearch instead.
+          :map pdf-view-mode-map
+          ("C-s" . isearch-forward))
   :custom (helm-swoop-speed-or-color nil "Give up colour for speed.")
           (helm-swoop-split-with-multiple-windows nil "Do not split window inside the current window."))
 #+END_SRC
@@ -1449,10 +1685,7 @@ possibly with examples, of the packages installed. For example,
 dash library works via examples ;-)
 ** Having a workspace manager in Emacs
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Having-a-workspace-manager-in-Emacs
 :END:
 
 I've loved using XMonad as a window tiling manager.  I've enjoyed the ability to
@@ -1466,6 +1699,7 @@ achieve the same thing by ‘grouping buffers together’. )
 
 #+BEGIN_SRC emacs-lisp
 (use-package perspective
+  :defer t
   :config ;; Activate it.
           (persp-mode)
           ;; In the modeline, tell me which workspace I'm in.
@@ -1483,14 +1717,13 @@ As always, since we've installed ~which-key~, it suffices to press ~C-x x~ then 
 at the resulting menu 😃
 ** Excellent PDF Viewer
 :PROPERTIES:
-
+:CUSTOM_ID: Excellent-PDF-Viewer
 :END:
-:PROPERTIES:
 
-:END:
 Let's install the [[https://github.com/politza/pdf-tools][pdf-tools]] library for viewing PDFs in Emacs.
 #+BEGIN_SRC emacs-lisp
 (use-package pdf-tools
+  :defer t
   ; :init   (system-packages-ensure "pdf-tools")
   :custom (pdf-tools-handle-upgrades nil)
           (pdf-info-epdfinfo-program "/usr/local/bin/epdfinfo")
@@ -1505,10 +1738,7 @@ easier on the eyes. For more, see the brief [[https://www.dailymotion.com/video/
 
 ** Who am I? ---Using Gnus for Gmail
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Who-am-I-Using-Gnus-for-Gmail
 :END:
 Let's set the following personal Emacs-wide variables ---to be used in other
 locations besides email.
@@ -1583,9 +1813,9 @@ I don't know what's your Gnus setup. To be honest, your question lacks the essen
        read the [[https://www.gnus.org/manual/message.pdf][Message Manual]].
 
 #+BEGIN_SRC emacs-lisp
-;; After startup, if Emacs is idle for 5seconds, then start Gnus.
+;; After startup, if Emacs is idle for 10 seconds, then start Gnus.
 ;; Gnus is slow upon startup since it fetches all mails upon startup.
-;; (run-with-idle-timer 5 nil #'gnus)
+(run-with-idle-timer 10 nil #'gnus)
 #+END_SRC
 
 Learn more by reading [[https://www.gnu.org/software/emacs/manual/html_mono/gnus.html#Top][The Gnus Newsreader Manual]]; also available within Emacs by
@@ -1597,9 +1827,7 @@ Learn more by reading [[https://www.gnu.org/software/emacs/manual/html_mono/gnus
 [[https://www.emacswiki.org/emacs/GnusTutorial][EmacsWiki]] has a less technical and more user friendly tutorial.
 
 *** Prettifications
-:PROPERTIES:
 
-:END:
 :PROPERTIES:
 
 :END:
@@ -1607,11 +1835,12 @@ Let's add the icon  near my mail groups ^_^
 #+BEGIN_SRC emacs-lisp
 ;; Fancy icons for Emacs
 ;; Only do this once:
-(use-package all-the-icons)
+(use-package all-the-icons :defer t)
   ; :config (all-the-icons-install-fonts 'install-without-asking)
 
 ;; Make mail look pretty
 (use-package all-the-icons-gnus
+  :defer t
   :config (all-the-icons-gnus-setup))
 
 ;; While we're at it: Make dired, ‘dir’ectory ‘ed’itor, look pretty
@@ -1639,11 +1868,10 @@ Next, let's paste in some [[http://groups.google.com/group/gnu.emacs.gnus/browse
 
 *** Super Terse Tutorial
 :PROPERTIES:
-
+:CUSTOM_ID: Super-Terse-Tutorial
 :END:
-:PROPERTIES:
 
-:END:
+                        ⟨ See the [[https://www.gnu.org/software/emacs/refcards/pdf/gnus-refcard.pdf][GNUS Reference Card]]! ⟩
 
 In gnus, by default items you've looked at disappear ---i.e., are archived.
 They can still be viewed in, say, your online browser if you like.
@@ -1685,12 +1913,27 @@ do changes take effect on articles ---such as moves, reads, deletes, etc.
 + =B m=:  Move an article, in its current state, to another group ---i.e.,
     ‘label’ using Gmail parlance.
 
-    Something to consider doing when finished with an article.
+    - Something to consider doing when finished with an article.
 
     To delete an article, simply move it to ‘trash’ ---of course this will delete it
     in other mail clients as well. There is no return from trash.
 
     Emails can always be archieved ---never delete, maybe?
+
+    Anyhow, ~B m Trash~ is too verbose, let's just use ~t~ for “trash”:
+    #+BEGIN_SRC emacs-lisp
+(with-eval-after-load 'gnus
+  (bind-key "t"
+          (lambda (N) (interactive "P") (gnus-summary-move-article N "[Gmail]/Trash"))
+          gnus-summary-mode-map))
+
+;; Orginally: t ⇒ gnus-summary-toggle-header
+#+END_SRC
+
+    - Select and deselect many articles before
+      moving them by pressing ~#~ and ~M-#~, respectively, anywhere on the entry.
+
+    - As usual, you can mark a region, =C-SPC=, then move all entries therein.
 
 + =R, r=: Reply with sender's quoted text in place, or without but
   still visible in an adjacent buffer.
@@ -1707,13 +1950,46 @@ do changes take effect on articles ---such as moves, reads, deletes, etc.
 + ~C-c C-a~ to attach a file; it'll be embedded in the mail body as plaintext.
   - Press ~o~ on an attachment to save it locally.
 
+*** Capturing Mail as Todo/Notes
+:PROPERTIES:
+:CUSTOM_ID: Capturing-Mail-as-Todo-Notes
+:END:
+
+Sometime mail contains useful reference material or may be a self-contained
+task. Rather than using our inbox as a todo-list, we can copy the content of the
+mail and store it away in our todos/notes files.  [[#Capturing-ideas-notes-without-interrupting-the-current-workflow][Capturing]], below, is a way to,
+well, capture ideas and notes /without/ interrupting the current workflow.  Below,
+in the section on capturing, we define ~my/org-capture-buffer~ which quickly
+captures the contents of the current buffer as notes to store away.  We use that
+method in the article view of mail so that ~c~ captures mail content with the
+option to provide additional remarks, and ~C~ to silently do so without additional
+remarks.
+
+#+BEGIN_SRC emacs-lisp
+(with-eval-after-load 'gnus
+
+(bind-key "c" #'my/org-capture-buffer gnus-article-mode-map)
+;; Orginally: c ⇒ gnus-summary-catchup-and-exit
+
+(bind-key "C"
+          (lambda (&optional keys)
+            (interactive "P") (my/org-capture-buffer keys 'no-additional-remarks))
+          gnus-article-mode-map))
+;; Orginally: C ⇒ gnus-summary-cancel-article
+#+END_SRC
+
+Gnus’ default =c= only enables a bad habit: Subscribing to stuff that you don't
+read, since you can mark all entries as read with one key. We now replace it
+with a ‘c’apturing mechanism that captures the current message as a todo or note
+for further processing. Likewise, the default =C= is to cancel posting an article;
+we replace it to be a silent capture: Squirrel away informative mail content
+without adding additional remarks.
+
 *** Auto-completing mail addresses
 :PROPERTIES:
-
+:CUSTOM_ID: Auto-completing-mail-addresses
 :END:
-:PROPERTIES:
 
-:END:
 In order to get going quickly, using [[https://github.com/redguardtoo/gmail2bbdb][gmail2bbdb]], let's convert our Gmail
 contacts into a BBDB file ---the [[http://bbdb.sourceforge.net/][Insidious Big Brother Database]] is an
 address-book application that we'll use for E-mail; if you want to use it as a
@@ -1730,10 +2006,10 @@ interface.
 
 #+begin_src emacs-lisp
 (use-package gmail2bbdb
+  :defer t
   :custom (gmail2bbdb-bbdb-file "~/Dropbox/bbdb"))
 
 (use-package bbdb
- :demand t
  :after company ;; The “com”plete “any”thig mode is set below in §Prose
  :hook   (message-mode . bbdb-insinuate-gnus)
          (gnus-startup-hook . bbdb-insinuate-gnus)
@@ -1745,9 +2021,6 @@ interface.
 Here is an [[http://emacs-fu.blogspot.com/2009/08/managing-e-mail-addresses-with-bbdb.html][emacs-fu]] article on managing e-mail addressed with bbdb.
 
 *** Feeds to Blogs                                               :Disabled:
-:PROPERTIES:
-
-:END:
 :PROPERTIES:
 
 :END:
@@ -1826,13 +2099,27 @@ like seeing the colours, fonts, and math symbols that the authours have labored
 over to producing quality content. Apparently, I'm shallow and I'm okay with it
 ---but not that shallow, since I'm constantly pushing Emacs which looks ugly by
 default but it's unreasonably powerful.
+** Jumping to extreme semantic units
+[[https://github.com/DamienCassou/beginend][Sometimes it's unreasonable]] for ~M-<~ to take us to the actual start of a buffer;
+instead it'd be preferable to go to the first “semantic unit” in the buffer. For
+example, when directory editing with ~dired~ we should jump to the first file,
+with version control with ~magit~ we should jump to the first section, when
+composing mail we should jump to the first body line, and in the agenda we
+should jump to the first entry.
+#+BEGIN_SRC emacs-lisp
+;; M-< and M-> jump to first and final semantic units.
+;; If pressed twice, they go to physical first and last positions.
+(use-package beginend
+  :diminish 'beginend-global-mode
+  :config (beginend-global-mode)
+    (loop for (_ . m) in beginend-modes do (diminish m)))
+#+END_SRC
+
 ** Hydra: Supply a prefix only once
 :PROPERTIES:
-
+:CUSTOM_ID: Hydra-Supply-a-prefix-only-once
 :END:
-:PROPERTIES:
 
-:END:
 Sometimes we have keybindings that share a common prefix, say ~C-c j~ and ~C-c k~,
 and we invoke them in an arbitrary sequence, it would be nice to invoke the
 shared prefix /only once/ thereby having:
@@ -1851,6 +2138,10 @@ shared prefix /only once/ thereby having:
 ;;   ;; List of triples (extension method description) )
 #+END_SRC
 
+# Center image
+#+ATTR_HTML: :style margin-left: auto; margin-right: auto;
+[[file:images/hydra.png]]
+
 From the [[https://github.com/abo-abo/hydra][Hydra]] repository is a ‘description for poets’:
 #+begin_quote
 Once you summon the Hydra through the prefixed binding (the body + any one
@@ -1862,14 +2153,103 @@ original purpose, calling his proper command. This makes the Hydra very
 seamless, it's like a minor mode that disables itself auto-magically.
 #+end_quote
 
-See [[#Taking-a-tour-of-one's-edits][Taking a tour of one's edits]] below for a small and useful example.
+⇒ The [[https://github.com/abo-abo/hydra/wiki][Hydra Wiki]] has many example hydras for common uses cases ⇐
+
+Below are two examples; one to simplify textual navigation and another for
+window navigation.
+Yet another possible hydra would be to avoid remembering word operations, such
+as copying a word, upcasing it, killing a word from anywhere within it ---in
+contrast ~kill-word~ kills /to the end/ of the word---, etc. Likewise for line
+operations, such as copying a line from anywhere in it.  See [[#Taking-a-tour-of-one's-edits][Taking a tour of
+one's edits]] below for another small and useful example.
+
+When there are multiple actions, it's nice to see such a menu displayed in the
+middle of the frame; so we use [[https://github.com/Ladicle/hydra-posframe#hydra-posframe][hydra-posframe]]. Moreover, it can be useful to
+group related actions under a common heading ---e.g., textual navigation may
+occur at the line level or word level or screen level--- we obtain a nice
+interface by declaraing hydras using [[https://github.com/jerrypnz/major-mode-hydra.el#get-started][pretty-hydra-define]] ---this saves us the
+trouble of [[https://github.com/abo-abo/hydra#the-impressive-looking-one][formating docstrings using classic hydra]].
+
+#+begin_src emacs-lisp
+;; Show hydras overlyaed in the middle of the frame
+(use-package hydra-posframe
+  :quelpa (hydra-posframe :fetcher git :url
+                          "https://github.com/Ladicle/hydra-posframe.git")
+  :hook (after-init . hydra-posframe-mode)
+  :custom (hydra-posframe-border-width 5))
+
+;; Neato doc strings for hydras
+(use-package pretty-hydra)
+#+end_src
+
+Declaration template:
+#+begin_example emacs-lisp
+ (pretty-hydra-define 𝓃𝒶𝓂ℯ (:title ⋯ :quit-key ⋯)
+   (title₀
+    (⋯(key₀ᵢ command₀ᵢ optional-doc₀ᵢ)⋯)
+    ⋮
+    titleₙ
+    (⋯(keyₙᵢ commandₙᵢ optional-docₙᵢ)⋯)))
+#+end_example
+
+*** Textual Navigation ---“Look Ma, no CTRL key!”
+
+Basic movement commands ---without having to hold the control key!
+
+=C-n= moves us to the next line, as it should; but it now /also/ let's us press
+=n,p,f,…= for other movement commands. Unlisted keys insert themselves, whereas ~q~
+close the pop-up menu.
+#+begin_src emacs-lisp
+(global-set-key
+ (kbd "C-n")
+ (pretty-hydra-define hydra-move
+   (:body-pre (next-line) :title "\t\t\t\t\tTextual Navigation" :quit-key "q")
+   ("Line"
+    (("n" next-line)
+     ("p" previous-line)
+     ("a" beginning-of-line)
+     ("e" move-end-of-line)
+     ("g" goto-line))
+
+   "Word"
+   (("f" forward-word "Next")
+    ("b" backward-word "Previous")
+    ("{" org-backward-element "Next Element")
+    ("}" org-forward-element "Previous Element"))
+
+   "Screen"
+   (("v" scroll-up-command "Scroll Down")
+    ("V" scroll-down-command "Scroll Up")
+    ("l" recenter-top-bottom "Center Page")
+    ("r" move-to-window-line-top-bottom "Relocate Point")
+    ("m" helm-imenu "Textual Menu")))))
+#+end_src
+
+*** Window Navigation
+It can be difficult to remember the incantations to adjust
+windows, so we can make a hydra to alleviate the trouble.
+#+begin_src emacs-lisp
+;; Use ijkl to denote ↑←↓→ arrows.
+(defhydra hydra-windows (global-map    "C-c w"   )
+  ("b" balance-windows                 "balance" )
+  ("i" enlarge-window                  "heighten")
+  ("j" shrink-window-horizontally      "narrow"  )
+  ("k" shrink-window                   "lower"   )
+  ("l" enlarge-window-horizontally     "widen"   )
+  ("s" switch-window-then-swap-buffer  "swap" :color teal))
+
+;; Provides a *visual* way to choose a window to switch to.
+(use-package switch-window :defer t)
+;; :bind (("C-x o" . switch-window)
+;;        ("C-x w" . switch-window-then-swap-buffer))
+
+;; Have a thick ruler between vertical windows
+(window-divider-mode)
+#+end_src
 
 ** Quickly pop-up a terminal, run a command, close it ---and zsh
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Quickly-pop-up-a-terminal-run-a-command-close-it-and-zsh
 :END:
 
 /Pop up a terminal, do some work, then close it using the same command./
@@ -1881,6 +2261,7 @@ universal arguments to pop those shells up, but ~C-t~ to pop them away.
 
 #+BEGIN_SRC emacs-lisp
 (use-package shell-pop
+  :defer t
   :custom
     ;; This binding toggles popping up a shell, or moving cursour to the shell pop-up.
     (shell-pop-universal-key "C-t")
@@ -1920,9 +2301,16 @@ Out of the box, zsh comes with
 The defaults have been good enough for me, for now ---as all else is achieved
 via Emacs ;-)
 
+Also, there's [[https://tldr.sh/][tldr]] tool which aims to be like terse manuals for commandline-tools
+in the style of practical example uses cases: ~tldr 𝒳~ yields a number of ways
+you'd actually use 𝒳.
+#+BEGIN_SRC emacs-lisp :tangle no
+(system-packages-ensure "tldr")
+#+END_SRC
+
 ** Restarting Emacs ---Keeping buffers open across sessions?
 :PROPERTIES:
-
+:CUSTOM_ID: Restarting-Emacs-Keeping-buffers-open-across-sessions
 :END:
 
 Sometimes I wish to close then reopen Emacs; unsurprisingly someone's
@@ -1930,7 +2318,7 @@ thought of implementing that.
 #+BEGIN_SRC emacs-lisp
 ;; Provides only the command “restart-emacs”.
 (use-package restart-emacs
-  :demand t
+  :defer t
   ;; Let's define an alias so there's no need to remember the order.
   :config (defalias 'emacs-restart #'restart-emacs))
 #+END_SRC
@@ -1952,11 +2340,9 @@ place where it was when you previously visited the same file.
 
 ** Automatic Backups
 :PROPERTIES:
-
+:CUSTOM_ID: Automatic-Backups
 :END:
-:PROPERTIES:
 
-:END:
 By default, Emacs saves backup files ---those ending in =~=--- in the current
 directory, thereby cluttering it up. Let's place them in ~~/.emacs.d/backups~, in
 case we need to look for a backup; moreover, let's keep old versions since
@@ -2024,12 +2410,57 @@ timestamp.
 +          =diff-backup= compares a file with its backup or vice versa.
   # But there is no function to restore backup files.
 
+** Screencapturing the Current Emacs Frame
+
+Sometimes an image can be tremendously convincing, or at least sufficiently
+inviting. The following incantation is written for MacOS and uses it's native
+=screencapture= utility, as well as =magick=.
+#+BEGIN_SRC emacs-lisp
+(defun my/capture-emacs-frame (&optional prefix output)
+"Insert a link to a screenshot of the current Emacs frame.
+
+Unless the name of the OUTPUT file is provided, read it from the
+user. If PREFIX is provided, let the user select a portion of the screen."
+(interactive "p")
+(defvar my/emacs-window-id
+   (s-collapse-whitespace (shell-command-to-string "osascript -e 'tell app \"Emacs\" to id of window 1'"))
+   "The window ID of the current Emacs frame.
+
+    Takes a second to compute, whence a defvar.")
+
+(let* ((screen  (if prefix "-i" (concat "-l" my/emacs-window-id)))
+       (temp    (format "emacs_temp_%s.png" (random)))
+       (default (format-time-string "emacs-%m-%d-%Y-%H:%M:%S.png")))
+;; Get output file name
+  (unless output
+    (setq output (read-string (format "Emacs screenshot filename (%s): " default)))
+    (when (s-blank-p output) (setq output default)))
+;; Clear minibuffer before capturing screen or prompt user
+(message (if prefix "Please select region for capture …" "♥‿♥"))
+;; Capture current screen and resize
+(thread-first
+    (format "screencapture -T 2 %s %s" screen temp)
+    (concat "; magick convert -resize 60% " temp " " output)
+    (shell-command))
+(f-delete temp)
+;; Insert a link to the image and reload inline images.
+(insert (concat "[[file:" output "]]")))
+(org-display-inline-images nil t))
+
+(bind-key* "C-c M-s" #'my/capture-emacs-frame)
+#+END_SRC
+
+Why this way? On MacOS, ImageMagick's =import= doesn't seem to work ---not at all
+for me! Also, I dislike how large the resulting image is. As such, I'm using
+MacOS's =screencapture= utility, which in-turn requires me to somehow obtain frame
+IDs. Hence, the amount of work needed to make this happen on my system was most
+simple if I just wrote it out myself rather than tweaking an existing system.
+
++ ~C-c C-x C-v~ ⇒ Toggle inline images!
+
 ** Editor Documentation with Contextual Information
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Editor-Documentation-with-Contextual-Information
 :END:
 
 /Emacs is an extensible self-documenting editor!/
@@ -2038,7 +2469,7 @@ Let's use a helpful Emacs /documentation/ system that cleanly shows a lot of
 contextual information ---then let's /extend/ that to work as we want it to:
 ~C-h o~ to describe the symbol at point.
 #+BEGIN_SRC emacs-lisp
-(use-package helpful)
+(use-package helpful :defer t)
 
 (defun my/describe-symbol (symbol)
   "A “C-h o” replacement using “helpful”:
@@ -2081,7 +2512,7 @@ default search item for help, otherwise a plain search box for help
 appears. Using a universal argument lets us drop to the built-in help command.
 * Cosmetics
 :PROPERTIES:
-
+:CUSTOM_ID: Cosmetics
 :END:
 
 Upon startup, we want to be greeted with a useful, yet unobtrusive, message
@@ -2092,10 +2523,7 @@ functionality is found with ~M-x dired~.
 
 ** Startup message: Emacs & Org versions
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Startup-message-Emacs-Org-versions
 :END:
 
 Let's always welcome ourselves when Emacs begins with a helpful message.  For
@@ -2120,7 +2548,7 @@ Now my startup message is,
 ;; Welcome Musa Al-hassy! Emacs 26.1; Org-mode 9.3; System alhassy-air.local
 #+end_src
 :Manually_Computing_Init_Time:
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (format "; Time %.3fs"
         (float-time (time-subtract (current-time) before-init-time)))
 #+END_SRC
@@ -2134,11 +2562,9 @@ as well as a nice ‘motto’:
 #+end_src
 ** My to-do list: The initial buffer when Emacs opens up
 :PROPERTIES:
-
+:CUSTOM_ID: My-to-do-list-The-initial-buffer-when-Emacs-opens-up
 :END:
-:PROPERTIES:
 
-:END:
 I almost always have Emacs open; I don't need a dashboard, but would like to see
 my to-do list and my init file, side-by-side.
 #+BEGIN_SRC emacs-lisp
@@ -2155,10 +2581,7 @@ yet minimalist splash screen showing recent files, projects, and bookmarks.
 
 ** Exquisite Themes
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Exquisite-Themes
 :END:
 
 Emacs' default theme leaves much to be desired:
@@ -2178,9 +2601,10 @@ We cycle between the chosen themes with ~C-x t~.
 (setf custom-safe-themes t)
 
 ;; Nice looking themes ^_^
-(use-package solarized-theme)
-(use-package doom-themes)
+(use-package solarized-theme :defer t)
+(use-package doom-themes :defer t)
 (use-package spacemacs-common
+  :defer t
   :ensure spacemacs-theme)
 #+END_SRC
 
@@ -2214,10 +2638,7 @@ want.
 
 ** A sleek & informative mode line
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: A-sleek-informative-mode-line
 :END:
 
 The ‘modeline’ is a part near the bottom of Emacs that gives information about
@@ -2259,9 +2680,15 @@ dark themes, and its modified powerline setup.
 ;; When using helm & info & default, mode line looks prettier.
 (use-package spaceline
   :custom (spaceline-buffer-encoding-abbrev-p nil)
-          (spaceline-line-column-p t) ;; Show “line-number : column-number” in modeline.
+          ;; Use an arrow to seperate modeline information
           (powerline-default-separator 'arrow)
-  :config (require 'spaceline-config)
+          ;; Show “line-number : column-number” in modeline.
+          (spaceline-line-column-p t)
+          ;; Use two colours to indicate whether a buffer is modified or not.
+          (spaceline-highlight-face-func 'spaceline-highlight-face-modified)
+  :config (custom-set-faces '(spaceline-unmodified ((t (:foreground "black" :background "gold")))))
+          (custom-set-faces '(spaceline-modified   ((t (:foreground "black" :background "cyan")))))
+          (require 'spaceline-config)
           (spaceline-helm-mode)
           (spaceline-info-mode)
           (spaceline-emacs-theme))
@@ -2270,13 +2697,108 @@ dark themes, and its modified powerline setup.
 Other separators ---of modeline information--- that I've considered include
 ~'brace~ instead of an arrow, and ~'contour, 'chamfer, 'wave, 'zigzag~ which look
 like browser tabs that are curved, boxed, wavy, or in the style of driftwood.
+** Powerful Directory Editing with ~dired~
+
+⟨ ~C-x C-v~ to open a file or directory in dired, using the current buffer. ⟩
+
+As mentioned earlier, ~dired~ is Emacs' built-in directory editor; it's opened
+with ~C-x d~.  /Dired let's us treat directories as textual objects!/ In dired,
+press ~h~ to see the many actions available. Here's a few:
+
++ ~(~ toggles hiding entry details, such as modification date and ownership
++ ~s~ sort entries; modeline will display “Dired by date” or “Dired by name”.
++ ~o~ to open entry in anOther window; or ~RET~ to open in place.
++ ~+~ to create a new directory; or ~M-x make-directory~.
++ ~/~ to filter entries; with ~which-key~, possible completions pop-up.
+  - E.g., ~/ f~ shows only files or ~/ . png~ to obtain all entries with extension
+    ~png~.
+  - ~/ i g~ to hide git-ignored items ^_^
+  - ~/ /~ to remove all filters.
++ ~TAB~ to navigate between different groupings of entries.
+  - ~RET~ on a drawer heading toggles folding it ^_^
+
+The [[https://github.com/Fuco1/dired-hacks#dired-hacks-utils][dired-hacks]] family of packages lets us, say, get a dired buffer out of a shell
+incantation that lists files, or use dired to open files with external tools.
+Below we use three of its packages.
+
+Pressing ~i~ inserts a directory's children under it, indented, in the current
+buffer. Useful to see what's there.
+#+BEGIN_SRC emacs-lisp
+(use-package dired-subtree
+  :bind (:map dired-mode-map
+              ("i" . dired-subtree-toggle)))
+#+END_SRC
+
+When directory ~𝒳~ has only one child ~𝒴~, then in dired, instead of ~𝒳~, show me ~𝒳/𝒴~
+with ~𝒳~ greyed out.
+#+BEGIN_SRC emacs-lisp
+(use-package dired-collapse
+  :hook (dired-mode . dired-collapse-mode))
+#+END_SRC
+
+Begin dired with certain entries grouped together, according to some filtering
+requirement; and with “garbage” files not shown ---i.e., those ending in
+~.aux, .out~, etc.
+#+BEGIN_SRC emacs-lisp
+(use-package dired-filter
+  :hook (dired-mode . (lambda () (dired-filter-group-mode)
+                                 (dired-filter-by-garbage)))
+  :custom
+    (dired-garbage-files-regexp
+      "\\(?:\\.\\(?:aux\\|bak\\|dvi\\|log\\|orig\\|rej\\|toc\\|out\\)\\)\\'")
+    (dired-filter-group-saved-groups
+      '(("default"
+         ("Org"    (extension "org"))
+         ("Executables" (exexutable))
+         ("Directories" (directory))
+         ("PDF"    (extension "pdf"))
+         ("LaTeX"  (extension "tex" "bib"))
+         ("Images" (extension "png"))
+         ("Code"   (extension "hs" "agda" "lagda"))
+         ("Archives"(extension "zip" "rar" "gz" "bz2" "tar"))))))
+#+END_SRC
+
+*** Neotree: Traditional Directory Tree Navigation :Disabled:
+
+                                  ⟨ Disabled ⟩
+
+We open a nifty file manager upon startup.
+#+BEGIN_SRC emacs-lisp :tangle no
+;; Sidebar for project file navigation
+(use-package neotree
+  :defer t
+  :disabled
+  :config (global-set-key "\C-x\ d" 'neotree-toggle)
+          (setq neo-theme 'icons)) ;; Uses all-the-icons from § Booting Up
+
+;; Open it up upon startup.
+;; (neotree-toggle)
+#+END_SRC
+By default ~C-x d~ invokes ~dired~, but I prefer ~neotree~ for file
+management.
+
+  ⟨ Edit: As a naive user, this is what I thought; yet a year later,
+                  I've almost never used neotree. ⟩
+
+Useful navigational commands include
++ ~U~ to go up a directory.
++ ~C-c C-c~ to change directory focus; ~C-C c~ to type the directory out.
++ ~?~ or ~h~ to get help and ~q~ to quit.
+
+As always, to go to the neotree pane when it's the only other window,
+execute ~C-x o~.
+
+I /rarely/ make use of this feature; company mode & Helm together quickly provide
+an automatic replacement for nearly all of my uses.
+
++ Reminiscent of GUI file managers is [[https://github.com/ralesi/ranger.el#features][ranger]]; e.g., it has multi-column
+  display of parent directories along with a file preview mechanism.
+
 ** Never lose the cursor
 :PROPERTIES:
-
+:CUSTOM_ID: Never-lose-the-cursor
 :END:
-:PROPERTIES:
 
-:END:
 Let's have the entire line containing the cursour be slightly highlighted.
 #+BEGIN_SRC emacs-lisp
 ;; Make it very easy to see the line with the cursor.
@@ -2294,11 +2816,9 @@ When we switch windows or scroll, for example, we get a wave of light near the c
 
 ** Dimming Unused Windows
 :PROPERTIES:
-
+:CUSTOM_ID: Dimming-Unused-Windows
 :END:
-:PROPERTIES:
 
-:END:
 Let's dim windows, and even the whole Emacs frame, when not in use.
 #+BEGIN_SRC emacs-lisp
 (use-package dimmer
@@ -2310,11 +2830,9 @@ on. It's nifty, but not for me.
 
 ** Buffer names are necessarily injective
 :PROPERTIES:
-
+:CUSTOM_ID: Buffer-names-are-necessarily-injective
 :END:
-:PROPERTIES:
 
-:END:
 By default when multiple files sharing the same name are opened, say for
 comparison from different directories, their buffers are named uniquely by
 having the format “⟨file-name⟩ <𝓃>”, for numbers 𝓃. It'd be more helpful
@@ -2337,11 +2855,9 @@ to have the buffer names reflect their location.
 
 ** Flashing when something goes wrong ---no blinking
 :PROPERTIES:
-
+:CUSTOM_ID: Flashing-when-something-goes-wrong-no-blinking
 :END:
-:PROPERTIES:
 
-:END:
 Make top and bottom of screen flash when something unexpected happens thereby
 observing a warning message in the minibuffer. E.g., C-g, or calling an unbound
 key sequence, or misspelling a word.
@@ -2359,11 +2875,9 @@ upwards and onwards.
 
 ** Hiding Scrollbar, tool bar, and menu
 :PROPERTIES:
-
+:CUSTOM_ID: Hiding-Scrollbar-tool-bar-and-menu
 :END:
-:PROPERTIES:
 
-:END:
 As a laptop user, screen space is important, so let's remove rarely used visual
 items.
 #+BEGIN_SRC emacs-lisp
@@ -2374,10 +2888,7 @@ items.
 
 ** Highlight & complete parenthesis pair when cursor is near ;-)
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Highlight-complete-parenthesis-pair-when-cursor-is-near
 :END:
 
 Highlight matching ‘parenthesis’ when near one of them.
@@ -2453,55 +2964,16 @@ becomes bold; likewise for ~/~ for emphasise.
 
 I use ‘~’ and ‘/’ too much during file navigation, and ‘*’ when marking numerous
 Org headers, for which the ‘completed closing pair’ must tiresomely be deleted.
-** Neotree: Directory Tree Listing
-:PROPERTIES:
-
-:END:
-:PROPERTIES:
-
-:END:
-We open a nifty file manager upon startup.
-#+BEGIN_SRC emacs-lisp
-;; Sidebar for project file navigation
-(use-package neotree
-  :config (global-set-key "\C-x\ d" 'neotree-toggle)
-          (setq neo-theme 'icons)) ;; Uses all-the-icons from § Booting Up
-
-;; Open it up upon startup.
-;; (neotree-toggle)
-#+END_SRC
-By default ~C-x d~ invokes ~dired~, but I prefer ~neotree~ for file
-management.
-
-  ⟨ Edit: As a naive user, this is what I thought; yet a year later,
-                  I've almost never used neotree. ⟩
-
-Useful navigational commands include
-+ ~U~ to go up a directory.
-+ ~C-c C-c~ to change directory focus; ~C-C c~ to type the directory out.
-+ ~?~ or ~h~ to get help and ~q~ to quit.
-
-As always, to go to the neotree pane when it's the only other window,
-execute ~C-x o~.
-
-I /rarely/ make use of this feature; company mode & Helm together quickly provide
-an automatic replacement for nearly all of my uses.
-
-+ Reminiscent of GUI file managers is [[https://github.com/ralesi/ranger.el#features][ranger]]; e.g., it has multi-column
-  display of parent directories along with a file preview mechanism.
-
 ** Tabs                                                           :Disabled:
 :PROPERTIES:
-
+:CUSTOM_ID: Tabs
 :END:
-:PROPERTIES:
 
-:END:
 I really like my Helm-supported ~C-x b~, but the visial appeal of a [[https://github.com/manateelazycat/awesome-tab][tab bar]] for Emacs
 is interesting. Let's try it out and see how long this lasts ---it may be like Neotree:
 Something cute to show to others, but not as fast as the keyboard.
 
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 (use-package awesome-tab
   :disabled
   :quelpa (awesome-tab :fetcher git :url "https://github.com/manateelazycat/awesome-tab.git")
@@ -2518,10 +2990,7 @@ An alternative is [[https://github.com/ema2159/centaur-tabs][centaur-tabs.]]
 
 ** Window resizing using the golden ratio                         :Disabled:
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Window-resizing-using-the-golden-ratio
 :END:
 
 Let's load the following package, which automatically resizes windows so that
@@ -2529,7 +2998,7 @@ the window containing the cursor is the largest, according to the golden ratio.
 Consequently, the window we're working with is nice and large yet the other windows
 are still readable.
 
-#+begin_src emacs-lisp
+#+begin_src emacs-lisp :tangle no
 (use-package golden-ratio
   :disabled
   :diminish golden-ratio-mode
@@ -2540,10 +3009,7 @@ After some time this got a bit annoying and I'm no longer  using this.
 
 ** Persistent Scratch Buffer
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Persistent-Scratch-Buffer
 :END:
 
 The ~*scratch*~ buffer is a nice playground for temporary data or experiments.
@@ -2553,6 +3019,7 @@ have not relocated our playthings to their appropriate files. Whence let's save
 & restore the scratch buffer by default.
 #+BEGIN_SRC emacs-lisp
 (use-package persistent-scratch
+  :defer t
   ;; In this mode, the usual save key saves to the underlying persistent file.
   :bind (:map persistent-scratch-mode-map
               ("C-x C-s" . persistent-scratch-save)))
@@ -2585,7 +3052,7 @@ I use Org-mode often, so that's how I want things to appear.
 
 * Prose
 :PROPERTIES:
-
+:CUSTOM_ID: Prose
 :END:
 
 Emacs can be setup with a spellchecker and other expected features of a word processing tool
@@ -2603,11 +3070,9 @@ places upon save.
 
 ** Fill-mode ---Word Wrapping
 :PROPERTIES:
-
+:CUSTOM_ID: Fill-mode-Word-Wrapping
 :END:
-:PROPERTIES:
 
-:END:
 In fill mode, when you type past the end of a line, Emacs automatically starts a
 new line, cleverly formatting paragraphs. This is a powerful form of “word
 wrap”.
@@ -2637,13 +3102,43 @@ thereby making it look better. With a prefix argument, it justifies it as well
 
             Note that ~M-o M-s~ centres a line of text ;-) Fun stuff!
 
+Fill-mode is also known as “hard word wrapping”, which has the counterpart
+“soft word wrapping” …
+
+Visual line mode is built-in and provides support for editing by visual lines:
+Lines off the screen are visually word wrapped, but logically remain one line.
+Moreover =C-a,e,k= operate on visual lines rather than logical lines.
+#+begin_src emacs-lisp
+;; Bent arrows at the end and start of long lines.
+(setq visual-line-fringe-indicators '(left-curly-arrow right-curly-arrow))
+(diminish 'visual-line-mode)
+(global-visual-line-mode 1)
+#+end_src
+Visual line mode is useful when I have way too many windows open or when
+using smaller frames.
+
+** Pretty Lists Markers
+
+When writing, it's common to use ~+,-,*~ to enumerate unordered lists
+---especially so in Org-mode wherein they denote structured text.  Let's render
+them visually as Unicode bullets.
+
+#+begin_src emacs-lisp
+;; (x y z) ≈ (existing-item replacement-item positivity-of-preceding-spaces)
+(require 'cl)
+(loop for (x y z) in '(("+" "◦" *)
+                       ("-" "•" *)
+                       ("*" "⋆" +))
+      do (font-lock-add-keywords 'org-mode
+                                 `((,(format "^ %s\\([%s]\\) " z x)
+                                    (0 (prog1 () (compose-region (match-beginning 1) (match-end 1) ,y)))))))
+#+end_src
+
 ** Word Completion
 :PROPERTIES:
-
+:CUSTOM_ID: Word-Completion
 :END:
-:PROPERTIES:
 
-:END:
 Let's enable [[https://company-mode.github.io/][“complete anything” mode]] ---it ought to start in half a second and
 only need two characters to get going, which means word suggestions are provided
 and so I need only type partial words then tab to get the full word!
@@ -2653,38 +3148,64 @@ and so I need only type partial words then tab to get the full word!
   :config
   (global-company-mode 1)
   (setq ;; Only 2 letters required for completion to activate.
-        company-minimum-prefix-length 2
+   company-minimum-prefix-length 2
 
-        ;; Search other buffers for compleition candidates
-        company-dabbrev-other-buffers t
-        company-dabbrev-code-other-buffers t
+   ;; Search other buffers for compleition candidates
+   company-dabbrev-other-buffers t
+   company-dabbrev-code-other-buffers t
 
-        ;; Allow (lengthy) numbers to be eligible for completion.
-        company-complete-number t
+   ;; Show candidates according to importance, then case, then in-buffer frequency
+   company-transformers '(company-sort-by-backend-importance
+                          company-sort-prefer-same-case-prefix
+                          company-sort-by-occurrence)
 
-        ;; M-⟪num⟫ to select an option according to its number.
-        company-show-numbers t
+   ;; Flushright any annotations for a compleition;
+   ;; e.g., the description of what a snippet template word expands into.
+   company-tooltip-align-annotations t
 
-        ;; Edge of the completion list cycles around.
-        company-selection-wrap-around t
+   ;; Allow (lengthy) numbers to be eligible for completion.
+   company-complete-number t
 
-        ;; Do not downcase completions by default.
-        company-dabbrev-downcase nil
+   ;; M-⟪num⟫ to select an option according to its number.
+   company-show-numbers t
 
-        ;; Even if I write something with the ‘wrong’ case,
-        ;; provide the ‘correct’ casing.
-        company-dabbrev-ignore-case t
+   ;; Show 10 items in a tooltip; scrollbar otherwise or C-s ^_^
+   company-tooltip-limit 10
 
-        ;; Immediately activate completion.
-        company-idle-delay 0))
+   ;; Edge of the completion list cycles around.
+   company-selection-wrap-around t
 
-;; It's so fast that we don't need a key-binding!
-;; (global-set-key (kbd "C-c h") 'company-complete)
+   ;; Do not downcase completions by default.
+   company-dabbrev-downcase nil
+
+   ;; Even if I write something with the ‘wrong’ case,
+   ;; provide the ‘correct’ casing.
+   company-dabbrev-ignore-case nil
+
+   ;; Immediately activate completion.
+   company-idle-delay 0)
+
+  ;; Use C-/ to manually start company mode at point. C-/ is used by undo-tree.
+  ;; Override all minor modes that use C-/; bind-key* is discussed below.
+  (bind-key* "C-/" #'company-manual-begin)
+
+  ;; Bindings when the company list is active.
+  :bind (:map company-active-map
+              ("C-d" . company-show-doc-buffer) ;; In new temp buffer
+              ("<tab>" . company-complete-selection)
+              ;; Use C-n,p for navigation in addition to M-n,p
+              ("C-n" . (lambda () (interactive) (company-complete-common-or-cycle 1)))
+              ("C-p" . (lambda () (interactive) (company-complete-common-or-cycle -1)))))
+
+;; It's so fast that we don't need a key-binding to start it!
 #+end_src
-Note that ~M-/~ goes through a sequence of completions.  Besides the
-arrow keys, we can also use ~C-~ or ~M-~ with ~n, p~ to navigate the options. Note
-that [[https://github.com/company-mode/company-mode/issues/360][by default]] company mode does not support completion for phrases containing
-hyphens ---this can be altered, if desired.
+Note that ~M-/~ goes through a sequence of completions ---and ~C-/~ manually begins
+company mode at point.  Besides the arrow keys, we can also use ~M-~ with ~n, p~ to
+navigate the options /or/ use ~C-s~ to search the list of suggestions.
+
++ Company backends are available as separate packages.
++ Note that [[https://github.com/company-mode/company-mode/issues/360][by default]] company mode does not support completion for phrases
+  containing hyphens ---this can be altered, if desired.
 
 Besides boring word completion, let's add support for [[https://github.com/dunn/company-emoji][emojis]].
 #+begin_src emacs-lisp
@@ -2697,9 +3218,13 @@ For example: 🥞 💻 🐵 ✉️😉 🐬 🌵.
 ➡️On a new line, write ~:~ then any letter to have a tool-tip appear.
 All emoji names are lowercase. ◀
 
-The libraries ~emojify~ and ~emojify-logos~ provides cool items like =:haskell: :emacs:
-:org: :ruby: :python:=.
-Unfortunately they do not easily export to html with org-mode, so I'm not using them.
++ On MacOS, ~C-⌘-SPC~ brings up an emoji picker, where one drags desired emojis to
+  textual areas.
++ [[https://gist.github.com/rxaviers/7360908][Here]] is a list of emoji ---all supported by Github.
+
+The libraries ~emojify~ and ~emojify-logos~ provides cool items like =:haskell:
+:emacs: :org: :ruby: :python:=.  Unfortunately they do not easily export to html
+with org-mode, so I'm not using them.
 :Alternatives:
 #+BEGIN_SRC emacs-lisp
 (use-package emojify
@@ -2726,8 +3251,9 @@ for completion of emoji names.
 
 ** Fix spelling as you type ---thesaurus & dictionary too!
 :PROPERTIES:
-
+:CUSTOM_ID: Fix-spelling-as-you-type-thesaurus-dictionary-too
 :END:
+
 I would like to check spelling on the fly.
  + ~C-;~ :: Cycle through corrections for word at point.
  + ~M-$~ :: Check and correct spelling of the word at point
@@ -2740,7 +3266,7 @@ comments and strings.
 (use-package flyspell
   :diminish
   :hook ((prog-mode . flyspell-prog-mode)
-         (org-mode text-mode . flyspell-mode)))
+         ((org-mode text-mode) . flyspell-mode)))
 #+END_SRC
 
 Enabling fly-spell for text-mode enables it for org and latex modes since they
@@ -2835,21 +3361,22 @@ think is not ideal since it provides way less information.
 :End:
 ** Touch Typing
 :PROPERTIES:
-
+:CUSTOM_ID: Touch-Typing
 :END:
+
 Use this game to help you learn to spell words that you're having trouble with;
 e.g., I have a file ~~/Dropbox/spelling.txt~ with words I have trouble spelling,
 which I open then run ~M-x typing-of-emacs~ in order to improve spelling said
 words.
 #+BEGIN_SRC emacs-lisp :tangle no
 ;; The Typing Of Emacs, a game.
-(use-package typing-of-emacs
+(use-package typing-of-emacs :defer t
   :quelpa (typing :fetcher wiki :url "https://www.emacswiki.org/emacs/typing.el"))
 #+END_SRC
 
 Practice touch typing using [[https://github.com/hagleitn/speed-type][speed-type]].
 #+begin_src emacs-lisp
-(use-package speed-type)
+(use-package speed-type :defer t)
 #+end_src
 Running ~M-x speed-type-region~ on a region of text, or ~M-x speed-type-buffer~ on a
 whole buffer, or just ~M-x speed-type-text~ will produce the selected region, buffer,
@@ -2868,6 +3395,7 @@ To assist in language learning, it may be nice to have an Emacs
 [[https://github.com/atykhonov/google-translate][interface]] to Google translate ---e.g., invoke ~google-translate-at-point~.
 #+BEGIN_SRC emacs-lisp
 (use-package google-translate
+ :defer t
  :config
    (global-set-key "\C-ct" 'google-translate-at-point))
 #+END_SRC
@@ -2884,10 +3412,7 @@ Neato 😲
 
 ** Using a Grammar & Style Checker
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Using-a-Grammar-Style-Checker
 :END:
 
 Let's install [[https://github.com/mhayashi1120/Emacs-langtool][a grammar and style checker]].
@@ -2895,10 +3420,10 @@ We get the offline tool from the bottom of the [[https://languagetool.org/][Lang
 as follows.
 #+BEGIN_SRC emacs-lisp
 (use-package langtool
- :config
-  (setq langtool-language-tool-jar
-     "~/Applications/LanguageTool-4.5/languagetool-commandline.jar")
-)
+ :defer t
+ :custom
+  (langtool-language-tool-jar
+   "~/Applications/LanguageTool-4.5/languagetool-commandline.jar"))
 #+END_SRC
 
 Now we can run ~langtool-check~ on the subsequent grammatically incorrect
@@ -2920,7 +3445,8 @@ It's 5 P.M. in the afternoon. The weather was nice on Thursday, 27 June 2017
 By looking around the source code, I can do all three stages smoothly (•̀ᴗ•́)و
 #+BEGIN_SRC emacs-lisp
 ;; Quickly check, correct, then clean up /region/ with M-^
-
+(eval-after-load 'langtool
+(progn
 (add-hook 'langtool-error-exists-hook
   (lambda ()
      (langtool-correct-buffer)
@@ -2930,18 +3456,16 @@ By looking around the source code, I can do all three stages smoothly (•̀ᴗ�
                 (lambda ()
                   (interactive)
                   (message "Grammar checking begun ...")
-                  (langtool-check)))
+                  (langtool-check)))))
 #+END_SRC
 
 The checking command is silent, we added a bit of comforting acknowledgement to the user.
 
 ** Lightweight Prose Proofchecking
 :PROPERTIES:
-
+:CUSTOM_ID: Lightweight-Prose-Proofchecking
 :END:
-:PROPERTIES:
 
-:END:
 Let's [[https://github.com/bnbeckwith/writegood-mode][write good]]!
 
 #+BEGIN_SRC emacs-lisp
@@ -3001,10 +3525,7 @@ Sentences that cut out the following problems may become stronger
 
 ** Placeholder Text ---For Learning & Experimenting
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Placeholder-Text-For-Learning-Experimenting
 :END:
 
 When learning about Emacs formatting commands, such as zap-to-char ~M-z~
@@ -3015,7 +3536,7 @@ inserting lists, sentences, paragraphs and using a prefix argument,
 with ~C-u~, we can request to generate any number of them.
 
 #+BEGIN_SRC emacs-lisp
-(use-package lorem-ipsum)
+(use-package lorem-ipsum :defer t)
 #+END_SRC
 
 ‘Lorem’ is not a word itself, but it comes from the Latin ‘Dolorem Ipsum’
@@ -3026,15 +3547,13 @@ bindings on lorem ipsum, gibberish text.
 
 ** Some text to make us smile
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Some-text-to-make-us-smile
 :END:
 
 The  [[https://github.com/davep/dad-joke.el][dad-joke]] queries [[https://icanhazdadjoke.com][https://icanhazdadjoke.com]] to bring us some funny.
 #+begin_src emacs-lisp
 (use-package dad-joke
+  :defer t
   :config (defun dad-joke () (interactive) (insert (dad-joke-get))))
 #+end_src
 
@@ -3045,6 +3564,9 @@ weekdays.
 #+end_quote
 
 ** Unicode Input via Agda Input
+:PROPERTIES:
+:CUSTOM_ID: Unicode-Input-via-Agda-Input
+:END:
 :agda2-include-dirs-Issue:
 #+BEGIN_SRC emacs-lisp
 ; (load (shell-command-to-string "agda-mode locate"))
@@ -3068,9 +3590,12 @@ Let's put it here ourselves.
 
 I almost always want the ~agda-mode~ input method ---it's like the TeX method, but better.
 #+BEGIN_SRC emacs-lisp
-(require 'agda-input)
-(setq default-input-method "Agda")
-(toggle-input-method)  ;; C-\
+(use-package agda-input
+  :ensure nil ;; I have it locally.
+  :demand t
+  :hook ((text-mode prog-mode) . (lambda () (set-input-method "Agda")))
+  :custom (default-input-method "Agda"))
+  ;; Now C-\ or M-x toggle-input-method turn it on and offers
 #+END_SRC
 
 :agda_Command_line_arguments:
@@ -3147,6 +3672,8 @@ Better yet, as a loop:
            ("ceil"   "⌈⌉")
            ("raise"  "⌈⌉")
            ("rad"    "⌈⌉")
+           ;; Arrows
+           ("<=" "⇐")
         ;; more (key value) pairs here
         )
       do (add-to-list 'agda-input-user-translations item))
@@ -3181,8 +3708,6 @@ Finally let's effect such translations.
 (agda-input-setup)
 #+end_src
 
-#+RESULTS:
-
 Note that the effect of [[http://ergoemacs.org/emacs/emacs_n_unicode.html][Emacs unicode input]] could be approximated using
 ~abbrev-mode~.
 
@@ -3193,7 +3718,7 @@ Note that the effect of [[http://ergoemacs.org/emacs/emacs_n_unicode.html][Emacs
 
 ** Increase/decrease text size
 :PROPERTIES:
-
+:CUSTOM_ID: Increase-decrease-text-size
 :END:
 The ‘usual’ text zoom keys ~C-±~ …
 #+BEGIN_SRC emacs-lisp
@@ -3204,44 +3729,54 @@ The ‘usual’ text zoom keys ~C-±~ …
 
 If thou knowst the ELisp, forgive this shadowing of the ~negative-argument~
 … we've still got ~M--~ though.
+
+Curious, this is one of the very first things I did when
+began using Emacs; yet, perhaps I would not have done
+it if I was simply told the defaults:
++ ~C-x C-=,+~ increases text size
++ ~C-x C--~ decreases test size
++ ~C-x C-0~ restores it to the default size
+
+So, the above snippet seems to save us of the prefix
+~C-x~ and we lose on using ‘=’ for text increase and worse we
+need the shift-key to get access to the ‘+’.
+
+I suppose this is just a habit inherited from using other tools. Fortunately, I
+did not inherit the need for the /common user access/ bindings ~C-x~ kill, ~C-c~ copy,
+~C-v~ paste, nor ~C-z~ undo of other applications. If you're interested, ~M-x
+cua-mode~ to enable [[https://www.gnu.org/software/emacs/manual/html_node/emacs/CUA-Bindings.html][CUA Bindings]].
+
 ** Moving Text Around
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Moving-Text-Around
 :END:
 
 This extends Org-mode's ~M-↑,↓~ to other modes, such as when coding.
 #+BEGIN_SRC emacs-lisp
 ;; M-↑,↓ moves line, or marked region; prefix is how many lines.
-(use-package move-text)
-(move-text-default-bindings)
+(use-package move-text
+  :config (move-text-default-bindings))
 #+END_SRC
 
 ** Enabling CamelCase Aware Editing Operations
 :PROPERTIES:
-
+:CUSTOM_ID: Enabling-CamelCase-Aware-Editing-Operations
 :END:
-:PROPERTIES:
 
-:END:
 [[https://www.gnu.org/software/emacs/manual/html_node/ccmode/Subword-Movement.html][Subword]] movement lets us treat “EmacsIsAwesome” as three words
 ─“Emacs”, “Is”, and “Awesome”─ which is desirable since such naming
 is common among coders. Now, for example, ~M-f~ moves along each subword.
 
 #+begin_src emacs-lisp
 (global-subword-mode 1)
-(diminish  'subword-mode)
+(diminish 'subword-mode)
 #+end_src
 
 ** Mouse Editing Support
 :PROPERTIES:
-
+:CUSTOM_ID: Mouse-Editing-Support
 :END:
-:PROPERTIES:
 
-:END:
 Text selected with the mouse is automatically copied to clipboard.
 #+begin_src emacs-lisp
 (setq mouse-drag-copy-region t)
@@ -3249,10 +3784,7 @@ Text selected with the mouse is automatically copied to clipboard.
 
 ** Delete Selection Mode
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Delete-Selection-Mode
 :END:
 
 Delete Selection mode lets you treat an Emacs region much like a typical text
@@ -3264,10 +3796,7 @@ selected text just by hitting the backspace key.
 #+END_SRC
 ** ~M-n,p~: Word-at-Point Navigation
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: M-n-p-Word-at-Point-Navigation
 :END:
 
 Let's mimic the ~C-n,p~ constructs from line to word, so that unoccupied ~M-n,p~ now
@@ -3276,6 +3805,7 @@ cursor. This is less intrusive than searching ~C-s~ or listing all occurrences ~
 o~.
 #+BEGIN_SRC emacs-lisp
 (use-package smartscan
+  :defer t
   :config
     (global-set-key (kbd "M-n") 'smartscan-symbol-go-forward)
     (global-set-key (kbd "M-p") 'smartscan-symbol-go-backward)
@@ -3305,10 +3835,7 @@ Also …
 #+END_SRC
 ** Letter-based Navigation
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Letter-based-Navigation
 :END:
 At a glance of possible positions, across windows,
 and a key to jump there is a feature provided to us by [[https://github.com/winterTTr/ace-jump-mode/wiki/AceJump-FAQ][ace-jump]]
@@ -3326,6 +3853,7 @@ me jump to any character or to any visible line.
 
 #+begin_src emacs-lisp
 (use-package ace-jump-mode
+  :defer t
   :config (bind-key* "C-c SPC" 'ace-jump-mode))
 
 ;; See ace-jump issues to configure for use of home row keys.
@@ -3361,11 +3889,9 @@ work of [[https://emacs.stackexchange.com/a/358/10352][doing it ourselves]].
 
 ** ~C-c e n,p~: Taking a tour of one's edits
 :PROPERTIES:
-
+:CUSTOM_ID: C-c-e-n-p-Taking-a-tour-of-one's-edits
 :END:
-:PROPERTIES:
 
-:END:
 This package allows us to move around the edit points of a buffer
 /without/ actually undoing anything. We even obtain a brief description
 of what happend at each edit point.
@@ -3376,7 +3902,8 @@ thought: Just press ~C-c e p~ to see what I did recently and where
 #+BEGIN_SRC emacs-lisp
 ;; Give me a description of the change made at a particular stop.
 (use-package goto-chg
-  :init (setq glc-default-span 0))
+  :defer t
+  :custom (glc-default-span 0))
 
 (defhydra hydra-edits (global-map "C-c e")
   ("p" goto-last-change "Goto nᵗʰ last change")
@@ -3391,7 +3918,7 @@ each time.
 
 * Org-Mode Administrivia
 :PROPERTIES:
-
+:CUSTOM_ID: Org-Mode-Administrivia
 :END:
 :Updating_FAQ:
 
@@ -3417,7 +3944,7 @@ sharing my screen with others.
 
 ** Getting Started                                                  :ignore:
 :PROPERTIES:
-
+:CUSTOM_ID: Getting-Started
 :END:
 Let's obtain Org-mode along with the extras that allow us to ignore
 heading names, but still utilise their contents ---e.g., such as a heading
@@ -3425,9 +3952,8 @@ named ‘preamble’ that contains org-mode setup for a file.
 #+begin_src emacs-lisp
 (use-package org
   :ensure org-plus-contrib
-  :config
-  (require 'ox-extra)
-  (ox-extras-activate '(ignore-headlines)))
+  :config (require 'ox-extra)
+          (ox-extras-activate '(ignore-headlines)))
 #+end_src
 
 ~org-plus-contrib~ contain the files that are included with Emacs plus all
@@ -3474,7 +4000,7 @@ default mode.
 
 ** Executing code from ~src~ blocks
 :PROPERTIES:
-
+:CUSTOM_ID: Executing-code-from-src-blocks
 :END:
 
 For example, to execute a shell command in Emacs, write a ~src~ with a shell
@@ -3518,18 +4044,12 @@ More languages can be added using ~add-to-list~.
 
 ** High Speed Literate Programming
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: High-Speed-Literate-Programming
 :END:
 
 *** Manipulating Sections
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Manipulating-Sections
 :END:
 
 Let's enable the [[http://notesyoujustmightwanttosave.blogspot.com/2011/12/org-speed-keys.html][Org Speed Keys]] so that when the cursor is at the beginning of
@@ -3542,35 +4062,50 @@ controls, such as:
   the narrowed detail.
 
 + ~I/O~ clock In/Out to the task defined by the current heading.
-   - Keep track of your work times!
-   - ~v~ view agenda.
-+ ~u~ for jumping upwards to the parent heading.
+  - Keep track of your work times!
+  - ~v~ view agenda.
 + ~c~ for cycling structure below current heading, or ~C~ for cycling global structure.
 + ~i~ insert a new same-level heading below current heading.
-+ ~w~ refile current heading; options list pops-up to select which heading to move it to. Neato!
-+ ~t~ cycle through the available TODO states.
++ ~w~ refile current heading; options list pops-up to select which heading to move
+  it to. Neato!
+  - =g= to go to another heading, without refiling anything.
+
+  #+BEGIN_SRC emacs-lisp
+;; Refile anywhere 1-level deep in current file,
+;; or anywhere in my agenda files 2-levels deep
+(setq org-refile-targets '((nil . (:maxlevel . 1))))
+      ;; (org-agenda-files . (:maxlevel . 2))  ;; ← Not useful right now.
+
+; Use full outline paths for refile targets - we file directly with IDO
+;; When refiling, using Helm, show me the hierarchy paths
+(setq org-outline-path-complete-in-steps nil)
+(setq org-refile-use-outline-path 'file-path)
+#+END_SRC
+
++ ~t/,/:/e~ to add a TODO state, priority level, tag, or effort estimate
 + ~^~ sort children of current subtree; brings up a list of sorting options.
 + ~n/p~ for next/previous /visible/ heading.
 + ~f/b~ for jumping forward/backward to the next/previous /same-level/ heading.
++ ~u~ for going to upwards to parent heading
 + ~D/U~ move a heading down/up.
 + ~L/R~ recursively promote (move leftwards) or demote (more rightwards) a heading.
-+ ~1,2,3~ to mark a heading with priority, highest to lowest.
++ ~1/2/3~ to mark a heading with priority, highest to lowest.
++ ~k/@/a~ to kill or mark or archive the current subtree
++ ~o~ to open a link mentioned in the subtree then go to the link; a pop-up of
+  links appears.
 
 We can add our own speed keys by altering the ~org-speed-commands-user~
 association list variable.
 
 #  To see the commands available, execute  ~M-x org-speed-command-help~.
-Moreover, ~?~ to see a complete list of keys available.
+⇒ Moreover, ~?~ to see a complete list of keys available. ⇐
 #+BEGIN_SRC emacs-lisp
 (setq org-use-speed-commands t)
 #+END_SRC
 
 *** Seamless Navigation Between Source Blocks
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Seamless-Navigation-Between-Source-Blocks
 :END:
 
 The “super key” ---aka the command or windows key--- can be used to jump to the
@@ -3591,10 +4126,7 @@ previous, next, or toggle editing org-mode source blocks.
 
 *** Modifying ~<return>~
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Modifying-return
 :END:
 
 + ~C-RET, C-S-RET~ make a new heading where the latter marks it as a ~TODO~.
@@ -3623,10 +4155,7 @@ In summary:
 
 *** ~C-a,e,k~ and Yanking of sections
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: C-a-e-k-and-Yanking-of-sections
 :END:
 
 On an org-heading, =C-a= goes to after the star, heading markers.
@@ -3651,11 +4180,9 @@ this, then refile instead of copy-pasting.
 
 ** Hiding Emphasise Markers & Inlining Images
 :PROPERTIES:
-
+:CUSTOM_ID: Hiding-Emphasise-Markers-Inlining-Images
 :END:
-:PROPERTIES:
-
-:END:
+Let's make some things prettier than they appear by default.
 #+BEGIN_SRC emacs-lisp
 ;; org-mode math is now highlighted ;-)
 (setq org-highlight-latex-and-related '(latex))
@@ -3667,6 +4194,9 @@ this, then refile instead of copy-pasting.
 ;; to have \alpha, \to and others display as utf8
 ;; http://orgmode.org/manual/Special-symbols.html
 #+END_SRC
+Org pretty entities seems rather impressive ---=M-x org-entities-help= to see all
+possibilities, or add your own. I'm already using the Agda input method, so I
+wont use Org's ---Agda's gives me a tiny menu narrowing possibilities as I type.
 
 The following is now disabled ---it makes my system slower than I'd like.
 #+BEGIN_SRC emacs-lisp :tangle no
@@ -3689,10 +4219,7 @@ $e^x = \sum_{n = 0}^\infty \frac{x^n}{n!}$
 
 ** Org-Emphasise for Parts of Words :Disabled:
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Org-Emphasise-for-Parts-of-Words
 :END:
 
 From [[https://stackoverflow.com/a/24540651/3550444][stackoverflow]], the following incantation allows us to have
@@ -3708,12 +4235,26 @@ I've disabled this feature since multiple occurrences
 of an emphasise marker are sometimes treated as one
 lengthy phrase being emphasised.
 
+** Proportional fonts for Headlines
+
+Let's have headings stick out a bit.
++ The larger headings are cute and reminicint of word processors, but having
+  headings coloured is enough ---the larger size is too much.
+#+BEGIN_SRC emacs-lisp
+(set-face-attribute 'org-document-title nil :height 2.0)
+;; (set-face-attribute 'org-level-1 nil :height 1.0)
+;; Remaining org-level-𝒾 have default height 1.0, for 𝒾 : 1..8.
+;;
+;; E.g., reset org-level-1 to default.
+;; (custom-set-faces '(org-level-1 nil))
+#+END_SRC
+
+Remember you can always use Emacs' Custom utility to get Lisp incantations ;-)
+---See notes on Custom above.
+
 ** Show off-screen heading at the top of the window
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Show-off-screen-heading-at-the-top-of-the-window
 :END:
 
 In case we forgot which heading we're under, let's keep
@@ -3730,10 +4271,7 @@ the current heading stuck at the top of the window.
 
 ** Jumping without hassle
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Jumping-without-hassle
 :END:
 
 #+BEGIN_SRC emacs-lisp
@@ -3753,10 +4291,7 @@ the current heading stuck at the top of the window.
 
 ** Folding within a subtree
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Folding-within-a-subtree
 :END:
 
 #+BEGIN_SRC emacs-lisp
@@ -3774,10 +4309,7 @@ the current heading stuck at the top of the window.
 
 ** Making Block Delimiters Less Intrusive
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Making-Block-Delimiters-Less-Intrusive
 :END:
 
 Let us render Org-mode's ~#+begin_src~ and ~#+end_src~ less obtrusively by, e.g.,
@@ -3882,10 +4414,13 @@ have busybodied headers which his setup disguises as ‘≡’.
 (defvar my/prettify-alist nil
   "Musa's personal prettifications.")
 
-(loop for pair in '(("<=" . ?≤) (">=" . ?≥)
-                    ("->" . ?→) ("-->". ?⟶) ;; threading operators
+(loop for pair in '(;; Example of how pairs like this to beautify org block delimiters
                     ("#+begin_example" . (?ℰ (Br . Bl) ?⇒)) ;; ℰ⇒
-                    ("#+end_example"   . ?⇐))                ;; ⇐
+                    ("#+end_example"   . ?⇐)                 ;; ⇐
+                    ;; Actuall beautifications
+                    ("<=" . ?≤) (">=" . ?≥)
+                    ("->" . ?→) ("-->". ?⟶) ;; threading operators
+                    ("[ ]" . ?□) ("[X]" . ?☑) ("[-]" . ?◐)) ;; Org checkbox symbols
 
       do (push pair my/prettify-alist))
 
@@ -3913,8 +4448,9 @@ A nice sanity:
 
 ** Org-mode's ~<𝒳~ Block Expansions
 :PROPERTIES:
-
+:CUSTOM_ID: Org-mode's-𝒳-Block-Expansions
 :END:
+
 In org-mode we type ~<X TAB~ to obtain environment templates, such as ~<s~ for
 source blocks or ~<q~ for quote blocks.  It seems recent [[https://orgmode.org/Changes.html#org1b5e967][changes]] to the org-mode
 structure template expansion necessitate explicitly loading ~org-tempo~.
@@ -3941,11 +4477,9 @@ language.  This saves us a few key strokes.
 
 *** COMMENT TODO Demoing Dot Graphs
 :PROPERTIES:
-
+:CUSTOM_ID: COMMENT-TODO-Demoing-Dot-Graphs
 :END:
-:PROPERTIES:
 
-:END:
 # Graphviz: Press <g-TAB to obtain a minimal editable example.
  #+BEGIN_SRC dot :file simple_markov.png :cmdline -Kdot -Tpng :results replace
  digraph {
@@ -3964,7 +4498,7 @@ language.  This saves us a few key strokes.
 
 * Org-Mode ⇒ PDF & HTML
 :PROPERTIES:
-
+:CUSTOM_ID: Org-Mode-PDF-HTML
 :END:
 In this section we consider the Org-mode exporters for PDFs and
 HTMLs. For example, we account for LaTeX citations and reliable HTML
@@ -3982,11 +4516,9 @@ anchors.
 
 ** Working with Citations
 :PROPERTIES:
-
+:CUSTOM_ID: Working-with-Citations
 :END:
-:PROPERTIES:
 
-:END:
  [[https://github.com/jkitchin/org-ref][An exquisite system]] for handling references.
 
  The following entity will display useful data
@@ -3996,35 +4528,32 @@ anchors.
 cite:agda_overview
 
     #+BEGIN_SRC emacs-lisp
-;; Files to look at when no “╲bibliography{⋯}” is not present in a file.
-;; Most useful for non-LaTeX files.
-(setq reftex-default-bibliography '("~/thesis-proposal/papers/References.bib"))
-(setq bibtex-completion-bibliography (car reftex-default-bibliography))
+(use-package org-ref :defer t
+  :custom ;; Files to look at when no “╲bibliography{⋯}” is not present in a file.
+          ;; Most useful for non-LaTeX files.
+        (reftex-default-bibliography '("~/thesis-proposal/papers/References.bib"))
+        (bibtex-completion-bibliography (car reftex-default-bibliography))
+        (org-ref-default-bibliography reftex-default-bibliography))
 
-(use-package org-ref
-  :config (setq org-ref-default-bibliography reftex-default-bibliography))
-
-(use-package helm-bibtex)
+;; Quick BibTeX references, sometimes.
+(use-package helm-bibtex :defer t)
+(use-package biblio :defer t)
 #+END_SRC
 
-  Execute ~M-x helm-bibtex~ or ~C-c ] and, say, enter ~agda~ and you will be presented with
-  all the entries in the bib database that mention ‘agda’. Super cool stuff.
+  Execute ~M-x helm-bibtex~ or ~C-c ] and, say, enter =emacs= and you will be
+  presented with all the entries in the bib database that mention ‘emacs’. Super
+  cool stuff. Moreover, if no such entries exist, then we can look some up
+  using the interface!
 
-  Read the manual [[https://github.com/jkitchin/org-ref/blob/master/org-ref.org][online]] or better yet as an org-file with ~M-x
-  org-ref-help~.
+  Read the manual [[https://github.com/jkitchin/org-ref/blob/master/org-ref.org][online]] or better yet as an org-file with ~M-x org-ref-help~.
 
-  This is an Org-mode application since the citations have tooltips
-  and export nicely to LaTeX & HTML via the Org-mode exporter.
+  This is an Org-mode application since the citations have tooltips and export
+  nicely to LaTeX & HTML via the Org-mode exporter.
 
-** Coloured LaTeX using Minted
-:PROPERTIES:
+** Bibliography & Coloured LaTeX using Minted
 
-:END:
-:PROPERTIES:
-
-:END:
-Execute the following for bib ref as well as minted Org-mode uses the
-Minted package for source code highlighting in PDF/LaTeX ---which in
+Execute the following for bibliography references as well as minted Org-mode
+uses the Minted package for source code highlighting in PDF/LaTeX ---which in
 turn requires the pygmentize system tool.
 #+BEGIN_SRC emacs-lisp
 (setq org-latex-listings 'minted
@@ -4048,11 +4577,9 @@ which is not necessary ideal when using LaTeX.
 
 ** Ensuring Useful HTML Anchors
 :PROPERTIES:
-
+:CUSTOM_ID: Ensuring-Useful-HTML-Anchors
 :END:
-:PROPERTIES:
 
-:END:
 Upon HTML export, each tree heading is assigned an ID to be used for hyperlinks.
 Default IDs are something like ~org1957a9d~, which does not endure the test of time:
 Re-export will produce a different id. Here's a rough snippet to generate
@@ -4105,11 +4632,9 @@ remaining consistent for when trees share similar properties.
 
 ** HTML “Folded Drawers”
 :PROPERTIES:
-
+:CUSTOM_ID: HTML-Folded-Drawers
 :END:
-:PROPERTIES:
 
-:END:
 #+BEGIN_SRC emacs-lisp
 (defun my/org-drawer-format (name contents)
   "Export to HTML the drawers named with prefix ‘fold_’, ignoring case.
@@ -4198,18 +4723,15 @@ Now that I've written this, I'm thinking it may have been preferably to use an o
 
 ** [[https://revealjs.com/?transition=zoom#/][Reveal.JS]] -- The HTML Presentation Framework
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: https-revealjs-com-transition-zoom-Reveal-JS-The-HTML-Presentation-Framework
 :END:
 
 Org-mode documents can be transformed into beautiful slide decks
 with [[https://github.com/yjwen/org-reveal/blob/master/Readme.org][org-reveal]] with the following two simple lines.
 
 #+BEGIN_SRC emacs-lisp
-(use-package ox-reveal
-  :config (setq org-reveal-root "https://cdn.jsdelivr.net/npm/reveal.js"))
+(use-package ox-reveal :defer t
+  :custom (org-reveal-root "https://cdn.jsdelivr.net/npm/reveal.js"))
 #+END_SRC
 # MA: ??? It looks like ox-reveal is being abandoned in favor of org-re-reveal,
 # a fork compatible with org-mode 9.2?
@@ -4246,16 +4768,13 @@ speaker notes in the flattened view.
 Within the flatenned view, one may wish to ~CTRL/CMD+P~ then save the
 resulting PDF locally.
 
-** COMMENT Org-mode ⇐ HTML
+** Org-mode ⇐ HTML :Disabled:
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: COMMENT-Org-mode-HTML
 :END:
 
 The following let's us copy htlm into org format using eww, Emacs' built-in web browser.
-#+BEGIN_SRC emacs-lisp
+#+BEGIN_SRC emacs-lisp :tangle no
 ;; See: https://emacs.stackexchange.com/questions/7171/paste-html-into-org-mode
 (use-package org-eww
  :quelpa (org-eww :fetcher git :url "https://github.com/Fuco1/org-mode.git"))
@@ -4268,7 +4787,7 @@ It does not work as I'd like, but may prove useful to have around.
 
 * Life within Org-mode
 :PROPERTIES:
-
+:CUSTOM_ID: Life-within-Org-mode
 :END:
 
 It's hard to estimate how long a task takes if you don't keep
@@ -4281,10 +4800,7 @@ schedule them into our ‘agenda’.
 
 ** Using Org-Mode as a Day Planner
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Using-Org-Mode-as-a-Day-Planner
 :END:
 
      ⟪ This section is based on a dated, yet delightful, tutorial
@@ -4301,10 +4817,7 @@ We want a day-planner with the following use:
 
 *** Capturing ideas & notes without interrupting the current workflow
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Capturing-ideas-notes-without-interrupting-the-current-workflow
 :END:
 
 [[https://orgmode.org/org.html#Setting-up-capture][Capture]] lets me quickly make notes & capture ideas, with associated reference material,
@@ -4323,27 +4836,29 @@ to be tackled later on.
 (setq org-default-notes-file "~/Dropbox/todo.org")
 
 ;; “C-c c” to quickly capture a task/note
-(define-key global-map "\C-cc" 'org-capture)
+(define-key global-map "\C-cc" #'my/org-capture) ;; See below.
 #+end_src
+
+⇒ Org capture actually lets us add /any/ type of entry, ‘programmable template’,
+to /any/ type of file!  ⇐
+
+( For now, I'm only using it to add entries to my tasks lists. )
 
 By default we only get a ‘tasks’ form of capture, let's add some more.
 #+begin_src emacs-lisp
 (cl-defun my/make/org-capture-template
-   (shortcut heading &optional (no-todo nil) (description heading) (category heading) (scheduled t))
+   (shortcut heading &optional (no-todo nil) (description heading) (scheduled nil))
   "Quickly produce an org-capture-template.
 
   After adding the result of this function to ‘org-capture-templates’,
   we will be able perform a capture with “C-c c ‘shortcut’”
   which will have description ‘description’.
-  It will be added to the tasks file under heading ‘heading’
-  and be marked with category  ‘category’.
+  It will be added to the tasks file under heading ‘heading’.
 
   ‘no-todo’ omits the ‘TODO’ tag from the resulting item; e.g.,
   when it's merely an interesting note that needn't be acted upon.
-  ─Probably a bad idea─
 
-  Defaults for ‘description’ and ‘category’ are set to the same as
-  the ‘heading’. Default for ‘no-todo’ is ‘nil’.
+  Default for ‘description’ is ‘heading’. Default for ‘no-todo’ is ‘nil’.
 
   Scheduled items appear in the agenda; true by default.
 
@@ -4353,9 +4868,8 @@ By default we only get a ‘tasks’ form of capture, let's add some more.
   when forming the entry.
   "
   `(,shortcut ,description entry
-      (file+headline org-default-notes-file
-         ,(concat heading "\n#+CATEGORY: " category))
-         , (concat "*" (unless no-todo " TODO") " %?\n"
+      (file+headline org-default-notes-file ,heading)
+         ,(concat "*" (unless no-todo " TODO") " %?\n"
                 (when nil ;; this turned out to be a teribble idea.
                   ":PROPERTIES:\n:"
                 (if scheduled
@@ -4368,26 +4882,36 @@ By default we only get a ‘tasks’ form of capture, let's add some more.
       (loop for (shortcut heading)
             in (-partition 2 '("t" "Tasks, Getting Things Done"
                                "r" "Research"
+                               "2" "2FA3"
                                "m" "Email"
                                "e" "Emacs (•̀ᴗ•́)و"
+                               "i" "Islam"
                                "b" "Blog"
                                "a" "Arbitrary Reading and Learning"
+                               "l" "Programming Languages"
                                "p" "Personal Matters"))
             collect  (my/make/org-capture-template shortcut heading)))
 
+;; Update: Let's schedule tasks during the GTD processing phase.
+;;
 ;; For now, let's automatically schedule items a week in advance.
 ;; TODO: FIXME: This overwrites any scheduling I may have performed.
-(defun my/org-capture-schedule ()
-  (org-schedule nil "+7d"))
-
-(add-hook 'org-capture-before-finalize-hook 'my/org-capture-schedule)
+;; (defun my/org-capture-schedule ()
+;;   (org-schedule nil "+7d"))
+;;
+;; (add-hook 'org-capture-before-finalize-hook 'my/org-capture-schedule)
 #+end_src
 
 For now I capture everything into a single file.  One would ideally keep
-separate client, project, information in its own org file.  The ~#+CATEGORY~
-appears alongside each task in the agenda view ---keep reading.
+separate client, project, information in its own org file.
 
-+ Looking at ~my/make/org-capture-template~, one notices that capture actually
+Rather than adding notes to particular Org headings in my =todo.org= file, I could
+defer such a choice by having only one template and have ~C-c a~ automatically use
+it. Then I could ‘refile’ tasks to their appropriate parent headings with ~w~.
+This allows us to seperate the concerns of capturing ideas from doing any form
+of processing. Something to consider.
+
++ Again: Looking at ~my/make/org-capture-template~, one notices that capture actually
   lets you add /any/ type of item to /any/ file.
 
 Let's also ensure TODO-s respect hierarchical structure.
@@ -4412,16 +4936,65 @@ Let's also ensure TODO-s respect hierarchical structure.
   (setq org-reverse-note-order nil)
   #+end_src
 
+Yet another place to capture content is from mail, such as for reference
+material, or self-contained tasks. See [[#Capturing-Mail-as-Todo-Notes][above]] for this discussion.
+
+#+begin_src emacs-lisp
+(cl-defun my/org-capture-buffer (&optional keys no-additional-remarks
+                                           (heading-regexp "Subject: \\(.*\\)"))
+  "Capture the current [narrowed] buffer as a todo/note.
+
+This is mostly intended for capturing mail as todo tasks ^_^
+
+When NO-ADDITIONAL-REMARKS is provided, and a heading is found,
+then make and store the note without showing a pop-up.
+This is useful for when we capture self-contained mail.
+
+The HEADING-REGEXP must have a regexp parenthesis construction
+which is used to obtain a suitable heading for the resulting todo/note."
+  (interactive "P")
+  (let* ((current-content (substring-no-properties (buffer-string)))
+         (heading         (progn (string-match heading-regexp current-content)
+                                 (or (match-string 1 current-content) ""))))
+    (org-capture keys)
+    (insert heading "\n\n\n\n" (s-repeat 80 "-") "\n\n\n" current-content)
+
+    ;; The overtly verbose conditions are for the sake of clarity.
+    ;; Moreover, even though the final could have “t”, being explicit
+    ;; communicates exactly the necessary conditions.
+    ;; Being so verbose leads to mutual exclusive clauses, whence order is irrelevant.
+    (cond
+     ((s-blank? heading)
+        (beginning-of-buffer) (end-of-line))
+     ((and no-additional-remarks (not (s-blank? heading)))
+        (org-capture-finalize))
+     ((not (or no-additional-remarks (s-blank? heading)))
+        (beginning-of-buffer) (forward-line 2) (indent-for-tab-command)))))
+#+end_src
+With that in-hand, we use a wrapper to ~org-capture~ to make use of it.
+#+begin_src emacs-lisp
+(defun my/org-capture (&optional prefix keys)
+  "Capture something!
+
+      C-c c   ⇒ Capture something; likewise for “C-uⁿ C-c c” where n ≥ 3.
+C-u   C-c c   ⇒ Capture current [narrowed] buffer.
+C-u 5 C-c c   ⇒ Capture current [narrowed] buffer without adding additional remarks.
+C-u C-u C-c c ⇒ Goto last note stored."
+  (interactive "p")
+  (case prefix
+    (4     (my/org-capture-buffer keys))
+    (5     (my/org-capture-buffer keys :no-additional-remarks))
+    (t     (org-capture prefix keys))))
+#+end_src
+
 - Org-protocol is a way to create capture notes in org-mode from other applications.
 
 Anyhow…
 *** Step 1: When new tasks come up
 :PROPERTIES:
-
+:CUSTOM_ID: Step-1-When-new-tasks-come-up
 :END:
-:PROPERTIES:
 
-:END:
 Isn't it great that we can squirrel away info into some default location
 then immediately return to what we were doing before ---with speed & minimal distraction! ♥‿♥
 Indeed, if our system for task management were slow then we may not produce
@@ -4444,10 +5017,7 @@ need to be done at all! ---[[http://newartisans.com/2007/08/using-org-mode-as-a-
 When my computer isn't handy, I'll make a note on my phone then transfer it later.
 *** Step 2: Filing your tasks
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Step-2-Filing-your-tasks
 :END:
 At a later time, a time of reflection, we go to our tasks list and actually
 schedule time to get them done by ~C-c C-s~ then pick a date by entering a number
@@ -4461,6 +5031,14 @@ in the form ~+𝓃~ to mean that task is due ~𝓃~ days from now.
   With time, it will become clear what is an unreasonable day
   verses what is an achievable day.
 
+[[https://orgmode.org/manual/Repeated-tasks.html][Repeat tasks]] by a repeater such as ‘+1m’ or ‘+7d’ in their timestamps; e.g.,
+  ~DEADLINE: <2005-10-01 Sat +1m>.~
+
+A ‘project’ is a task that has multiple steps, each as a checkbox item. It can
+be given a percentage marker to show progress: Place ~[%]~ after its name, then
+press ~C-c #~ on the name to see a completion percentage ---press ~C-c C-c~ on a
+checkbox item to toggle its completion state.
+
 Let's keep track of how many times, and when, we have pushed events to other dates.
 #+BEGIN_SRC emacs-lisp
 ;; Add a note whenever a task's deadline or scheduled date is changed.
@@ -4469,11 +5047,9 @@ Let's keep track of how many times, and when, we have pushed events to other dat
 #+END_SRC
 *** Step 3: Quickly review the upcoming week
 :PROPERTIES:
-
+:CUSTOM_ID: Step-3-Quickly-review-the-upcoming-week
 :END:
-:PROPERTIES:
 
-:END:
 The next day we begin our work, we press ~C-c a a~ to see the
 scheduled tasks for this week ---~C-c C-s~ to re-schedule the
 task under the cursor and ~r~ to refresh the agenda.
@@ -4481,12 +5057,14 @@ task under the cursor and ~r~ to refresh the agenda.
 (define-key global-map "\C-ca" 'org-agenda)
 #+end_src
 
++ Show the next 𝓃 days schedule ⇐ =C-u 𝓃 C-c a a=.
+
+The next section, [[Super Agenda]], will discuss acting on entries in the agenda
+buffer.
+
 *** Step 4: Getting ready for the day
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Step-4-Getting-ready-for-the-day
 :END:
 After having seen our tasks for the week, we press ~d~ to enter daily view
 for the current day. Now we decide whether the items for today are
@@ -4509,11 +5087,9 @@ priority.  Then ~r~ to refresh.
 
 *** Step 5: Doing the work
 :PROPERTIES:
-
+:CUSTOM_ID: Step-5-Doing-the-work
 :END:
-:PROPERTIES:
 
-:END:
 Since ~A~ tasks are the important and urgent ones, if you do all of the ~A~ tasks and
 nothing else today, no one would suffer. It's a good day (─‿‿─).
 
@@ -4527,11 +5103,9 @@ Either at the end of the day or the start of the next.
 
 *** Step 6: Moving a task toward completion
 :PROPERTIES:
-
+:CUSTOM_ID: Step-6-Moving-a-task-toward-completion
 :END:
-:PROPERTIES:
 
-:END:
 My workflow states are described in the section
 [[Workflow States]] and contain states: ~TODO, STARTED, WAITING, ON_HOLD, CANCELLED, DONE~.
 + Tasks marked ~WAITING~ are ones for which we are awaiting some event, like someone
@@ -4554,10 +5128,7 @@ every clock-out is much more practical, for me at least.
 
 *** Step 7: Archiving Tasks
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Step-7-Archiving-Tasks
 :END:
 During the review state, when a task is completed, ‘archive’ it with ~C-c C-x
 C-s~: This marks it as done, adds a time stamp, and moves it to a local
@@ -4579,7 +5150,8 @@ file too, if we enable it so.
 #+begin_src emacs-lisp
 ;; Invoking the agenda command shows the agenda and enables
 ;; the org-agenda variables.
-(org-agenda "a" "a") ;; ➩ Show my agenda upon Emacs startup.
+;; ➩ Show my agenda upon Emacs startup.
+(org-agenda "a" "a") ;; Need this to have “org-agenda-custom-commands” defined.
 #+end_src
 
 Let's install some helpful views for our agenda.
@@ -4603,45 +5175,240 @@ Let's install some helpful views for our agenda.
               (org-agenda-overriding-header "Unscheduled TODO entries: "))))
 #+end_src
 
+/At the end of the day, let's schedule at least 3 things that must be done the
+next day; i.e., have priority =A=./
+
+** Tag! You're it!
+
+Even when items are categorised under their own parent headings, they may be
+related in some way and that can made explicit by adding a ~:tag:~ to their
+headings; e.g., two entries both have the ~:jasim:@work:~ tags, then looking for
+the ~:@work:~ tag shows me all entries that are tagged as “at work”.
+
+            | Tags provide a cross-section of one's entries. |
+
+Tags let us find related stuff quickly, even though they're differently
+categorised.
+
+/After calling ~org-agenda~, we may select ~m~ to match for tags, or use
+~org-tags-view~ to search for tags./
+
+*What to tag?* Common tags are =:@laptop:, :@work:, :@home:= to identify the
+location where tasks take place ---Use: When I'm at a particular place, I need
+only consider tasks that apply to that place ;-) Other tags I use are =:𝑭𝑳:= to
+identify remarks or email or request from person 𝑭irstname 𝑳astname; or
+something that might be interesting to that person.  I also use ~:video:, :book:,
+:paper:~; which let me quickly find all videos!  Finally, I also use
+=:project_name:= to identify notes that may be of interest to a particular
+project, but are more appropriately categorised elsewhere ---e.g., when learning
+about an Emacs feature, I may tag my notes with another project's name to
+consider whether that feature could be useful there.
+
+*How to tag?*
+
+You can just add a ~:tag₁:⋯:tagₙ:~ after a heading. If you press space, before the
+tags, then they are automatically indented flushright to column 77; postive
+numbers do not flushright but use exact column number.
+#+BEGIN_SRC emacs-lisp
+ (setq org-tags-column -77) ;; the default
+#+END_SRC
+
+Use ~C-c C-q~, or ~org-set-tags-command~, on a heading or just the speed key ~:~ on
+the asterisks of a heading to set the tags of an item ---as usual, with Helm we
+obtain a window of all existing tags to select from. Unfortunatley, this only
+supports having one tag; for more, you can add them in manually or …
+
+#+begin_src emacs-lisp
+(use-package helm-org) ;; Helm for org headlines and keywords completion.
+(add-to-list 'helm-completing-read-handlers-alist
+             '(org-set-tags-command . helm-org-completing-read-tags))
+
+;; Also provides: helm-org-capture-templates
+#+end_src
+
+Now ~:~ or ~C-c C-q~ will show existing tags for the current heading, press ~TAB~ to
+obtain a list of all exisiting tags, press ~C-SPC~ to select the desired tags,
+then =TAB= or =RET= to confirm the resulting tag list, and ~RET~ to finish or ~TAB~ to
+select more tags.
+
+Let's render tags by Unicode symbols.
+#+begin_src emacs-lisp
+(use-package org-pretty-tags
+  :diminish org-pretty-tags-mode
+  :demand t
+  :config
+   (setq org-pretty-tags-surrogate-strings
+         '(("Neato"    . "💡")
+           ("Blog"     . "✍")
+           ("Audio"    . "♬")
+           ("Video"    . "📺")
+           ("Book"     . "📚")
+           ("Running"  . "🏃")
+           ("Question" . "❓")
+           ("Wife"     . "💕")
+           ("Text"     . "💬") ; 📨 📧
+           ("Friends"  . "👪")
+           ("Self"     . "🍂")
+           ("Finances" . "💰")
+           ("Car"      . "🚗") ; 🚙 🚗 🚘
+           ("Urgent"   . "🔥"))) ;; 📥 📤 📬
+   (org-pretty-tags-global-mode 1))
+#+end_src
+
+** Pretty Prioritisation Markers
+
+Let's set four priority levels and their colours: The more intense colours
+are for more urgent tasks.
+#+begin_src emacs-lisp
+(setq org-lowest-priority ?D) ;; Now org-speed-eky ‘,’ gives 4 options
+(setq org-priority-faces
+'((?A :foreground "red" :weight bold)
+  (?B . "orange")
+  (?C . "yellow")
+  (?D . "green")))
+#+end_src
+
++ ~C-c ,~ anywhere to set the priority of the current heading.
+  - We may press ~A-D~ or ~SPC~ to an remove existing priority.
+
+Priority markers are of the form ~[#𝒳]~, the [[https://github.com/harrybournis/org-fancy-priorities][fancy priorities]] package visually
+renders them as words or icons.
+#+begin_src emacs-lisp
+(use-package org-fancy-priorities
+  :diminish t
+  :hook   (org-mode . org-fancy-priorities-mode)
+  :custom (org-fancy-priorities-list '("HIGH" "MID" "LOW" "OPTIONAL")))
+#+end_src
+
 ** Super Agenda
 :PROPERTIES:
-
+:CUSTOM_ID: Super-Agenda
 :END:
-:PROPERTIES:
 
-:END:
-The following incentivizes us to make use of ~:tags:~ so that our agenda displays
-the tasks of the day depending on their tags ---possibly using complex predicates.
-/This is far preferable to having them all in one big list./
+Org agenda is an interactive tool for generating summary reports from Org data
+---e.g., commonly, the weekly task list is generated from todo tasks.
+
+The agenda dispatch menu, ~C-c a~, has options for displaying tasks ---e.g., ~C-c a
+m~ generates a list of entries having the same tags.  new ways to view tasks by
+altering the ~org-agenda-custom-commands~ variable ---e.g., above we added two,
+one for completed tasks and one for unscheduled tasks.
+
+# Moreover, we can overlay due dates and priorities to tasks in a non-intrusive
+# way that is easy to edit by hand.
+Let's setup the basics of our agenda.
+#+begin_src emacs-lisp
+;; List of all the files & directories where todo items can be found. Only one
+;; for now: My default notes file.
+(setq org-agenda-files (list org-default-notes-file))
+
+;; Display tags really close to their tasks.
+(setq org-agenda-tags-column -10)
+
+;; How many days ahead the default agenda view should look
+(setq org-agenda-span 'day)
+;; May be any number; the larger the slower it takes to generate the view.
+;; One day is thus the fastest ^_^
+
+;; How many days early a deadline item will begin showing up in your agenda list.
+(setq org-deadline-warning-days 14)
+
+;; In the agenda view, days that have no associated tasks will still have a line showing the date.
+(setq org-agenda-show-all-dates t)
+
+;; Scheduled items marked as complete will not show up in your agenda view.
+(setq org-agenda-skip-scheduled-if-done t)
+(setq org-agenda-skip-deadline-if-done  t)
+#+end_src
+
+The agenda view, like nearly all Emacs entities, is interactive:
++ =𝓃 f,b= ⇒ Look forward at next week's agenda, or backward to a previous week.
+  - The optional $𝓃$ means do the action =𝓃=-many times;
+    it defaults to 1.
++ =w, d= ⇒ toggle week view, or day view; use ~v~ to see possible views.
+  - E.g., ~C-u 2017 v y~ shows us the specific year 2017.
++ =𝓃 n,p= to navigate to next and previous entries.
++ =t= ⇒ cycle TODO state of the current entry.
++ =±= ⇒ cycle priority state.
++ =𝓃 S-⇆= ⇒ Shift date time by $𝓃$ days; 1 day by default.
++ =C-c C-s= ⇒ Reschedule an entry; prefix it with ~C-u~ to remove a scheduled entry.
+  - [[https://orgmode.org/manual/Repeated-tasks.html][Repeat tasks]] by a repeater such as ‘+1m’ or ‘+7d’
+  in their timestamps; e.g., ~DEADLINE: <2005-10-01 Sat +1m>.~
++ =s= ⇒ save all agenda buffers; i.e., save the org-files where the agenda items live.
++ =g= ⇒ Rebuild agenda according to any changes made thus far.
++ =F= ⇒ Toggle ‘follow mode’: As you go up/down entries, you can see their
+  details in an adjacent window.
+  - =SPC= ⇒ Show details of a single entry in other window; stay in Agenda.
++ =RET, TAB= ⇒ Go to the current entry in the current window or in a new
+  adjacent window, so as to alter task details.
+
+# ;; Easy way to capture tasks when in agenda view.
+# (define-key org-agenda-mode-map "c" #'org-capture)
+
+The agenda view –--even in the 7-days-at-a-time view--– will always begin on the
+current day.  This is important, since while using org-mode as a day planner,
+you never want to think of days gone past. That’s something you do in other
+ways, such as when reviewing completed tasks.
+#+begin_src emacs-lisp
+(setq org-agenda-start-on-weekday nil)
+#+end_src
+
+Instead of having the day's tasks all in one field, org-super-agenda allows us
+to use predicates to group entries together; e.g., by considering an entry's
+=:tags:= or its priority level. Since I'm placing all my tasks in a single file,
+under appropriate parent headings, I want entries to be shown according to their
+parent heading. Of-course, the top-most grouping, the important tasks, should be
+pulled out of their group and placed at the top.
 #+BEGIN_SRC emacs-lisp
 (use-package org-super-agenda
+  :hook (org-agenda-mode . origami-mode) ;; Easily fold groups via TAB.
+  :bind (:map org-super-agenda-header-map ("<tab>" . origami-toggle-node))
   :config
   (org-super-agenda-mode)
   (setq org-super-agenda-groups
+        '((:name "Important" :priority "A")
+          (:name "Personal" :habit t)
+          ;; For everything else, nicely display their heading hierarchy list.
+          (:auto-map (lambda (e) (org-format-outline-path (org-get-outline-path)))))))
+
+;; MA: No noticable effect when using org-super-agenda :/
+;;
+;; Leave new line at the end of an entry.
+;; (setq org-blank-before-new-entry '((heading . t) (plain-list-item . t)))
+#+END_SRC
+
+:OlderSetup:
+#+BEGIN_SRC emacs-lisp :tangle no
         ;; Default order is 0, first come first serve.
         ;; Items are “or”-ed by default.
         '((:name "Important"
                  :tag "PackageFormer"
+                 :tag "PF"
+                 :tag "research"
                  :and (:tag "JC" :priority "A")
                  :and (:tag "WK" :priority "A")
                  :priority "A")
 
           ;; Groups supply their own section names when none are given
-          (:tag "personal")
-          (:tag "3mi3")
+          (:name "Living the dream!" :tag "personal")
+          (:name "Discrete Mathematics" :tag "2fa3")
           (:name "Emacs Init" :tag "init")
-          (:priority<= "B" :order 1))))
+          ;; (:priority<= "B" :order 1)
+          ;; Everything else automatically gets its own group
+          (:auto-category t)
+          )))
 #+END_SRC
+:End:
++ Origami mode ---see below in [[Text Folding with Origami-mode]]---
+  works well with super-agenda. Just ~M-x origami-mode~ then ~C-c f~ to
+  enable the folding hydra.
 
-The [[https://github.com/alphapapa/org-super-agenda][org-super-agenda]] homepage shows complex configurations and pleasant screenshots
-contrasting with and without the system.
+The [[https://github.com/alphapapa/org-super-agenda][org-super-agenda]] homepage shows complex configurations and pleasant
+screenshots contrasting with and without the system.
+E.g., you can change how entries in particular headings are displayed and coloured.
 
 ** Automating [[https://en.wikipedia.org/wiki/Pomodoro_Technique][Pomodoro]] ---“Commit for only 25 minutes!”
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Automating-https-en-wikipedia-org-wiki-Pomodoro-Technique-Pomodoro-Commit-for-only-25-minutes
 :END:
 
 Effort estimates are for an entire task.
@@ -4680,11 +5447,10 @@ good, and do more searches; then again, I've learned a lot by writing code. ⟩
 
 ** Journaling
 :PROPERTIES:
-
+:CUSTOM_ID: Journaling
 :END:
-:PROPERTIES:
 
-:END:
+*** Intro :ignore:
 
 Thus far I've made it easy to quickly capture ideas and tasks, not so much on
 the analysis phase:
@@ -4702,7 +5468,8 @@ made.  Unlike capture and its agenda support, journal ensures entries are
 maintained in chronological order with calendar support.
 
 Since org files are plain text files, an entry can be written anywhere and later
-ported to the journal.
+ported to the journal. Or, written directly in the journal file if we add the
+necessary Org-header: Asterisks and time.
 
 The separation of concerns is to emphasise the capture stage as being quick and
 relatively mindless, whereas the journaling stage as being mindful.  Even though
@@ -4725,6 +5492,8 @@ produce a report on what has been happening recently, at work for example. I'd
 like to have multiple journals, for work and for personal life, as such I will
 utilise a prefix argument to obtain my work specific entries.
 
+*** The Setup
+
 Anyhow, the setup:
 #+begin_src emacs-lisp
 (defun my/org-journal-new-entry (prefix)
@@ -4745,6 +5514,8 @@ Anyhow, the setup:
         org-journal-file-type   'yearly
         org-journal-file-format "Personal-%Y-%m-%d"))
 #+end_src
+
+*** Super Terse Tutorial
 
 Bindings available in ~org-journal-mode~, when journaling:
 + ~C-c C-j~: Insert a new entry into the current journal file.
@@ -4776,12 +5547,95 @@ journal entries do ~M-x calendar~.  Bindings available in the calendar-mode:
 #
 # [ - go to previous day with journal entries.
 # ] - go to next day with journal entries.
+
+*** Guided Journaling
+:PROPERTIES:
+:CUSTOM_ID: Guided-Journaling
+:END:
+
+Sometimes it can be tough to journal, but filling in a template can be a way to
+get started. Later on, we will setup [[Snippets ---Template Expansion]] which will
+allow us to write =journal_guided= then ~TAB~ to obtain the template below. Each =$𝓃=
+indicates a position that we may input text, after which we ~TAB~ to move to next
+location.
+
+Just like the ~undo-tree~ setup at the start of this read, we use a =noweb-ref=
+to present this template in a natural position; then later when template
+expansion it setup, we request it to be tangled.
+
+#+begin_src org :noweb-ref templates-from-other-places-in-my-init :tangle no
+,** journal_guided: Introspection & Growth
+I'm writing from ${1:location}.
+
+Gut answer, today I feel ${2:scale}/10.
+⇒ ${3:Few words or paragraphs to explain what's on your mind.}
+
+${4: All things which cause us to groan or recoil are part of the tax of
+life. These things you should never hope or seek to escape.  Life is a battle,
+and to live is to fight.
+
+⟨ Press TAB once you've read this mantra. ⟩
+$(when yas-moving-away-p "")
+}
+`(progn
+  (eww "https://www.dailyinspirationalquotes.in/")
+  (sit-for 2) (when nil let eww load)
+  (read-only-mode -1)
+  (goto-line 52)
+  (kill-line)
+  (kill-buffer)
+  (yank))`
+${7:
+Self Beliefs:
++ I am working on a healthier lifestyle, including a low-carb diet.
+
+  - I’m also investing in a healthy, long-lasting relationship.
+
+  ➩ These are what I want and are important to me. ⇦
+
++ I will not use any substances to avoid real issues in my life. I must own them.
+
++ Everything I’m searching for is already inside of me.
+
++ Progress is more important than perfection.
+
+⟨ Press TAB once you've read these beliefs. ⟩
+$(when yas-moving-away-p "")
+}
+
+*Three things I'm grateful for:*
+1. ${8:??? … e.g., old relationship, something great yesterday, an opportunity I
+   have today, something simple near me within sight}
+2. ${9:??? … e.g., old relationship, something great yesterday, an opportunity I
+   have today, something simple near me within sight}
+3. ${10:??? … e.g., old relationship, something great yesterday, an opportunity I
+   have today, something simple near me within sight}
+
+*Three things that would make today great:*
+1. ${11:???}
+2. ${12:???}
+3. ${13:???}
+
+*What one thing is top of mind today?*
+${14:???}
+
+*What’s one opportunity I want to go after?*
+${15:???}
+
+*What’s one thing I’m really proud of OR I’m amazed and in awe of?*
+${16:???}
+
+$0
+#+end_src
+
+Besides a bit of webscraping to obtain a daily inspirational quote image, and
+the necessary yasnippet code, this template was taken from a discussion on
+[[https://news.ycombinator.com/item?id=20849148][Hacker news: “I find journaling indispensable”]].  In time, I will likely alter it
+to meet my needs, but I like it as it is right now (•̀ᴗ•́)و
+
 ** Workflow States
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Workflow-States
 :END:
 
 Here are some of my common workflow states, ---the ‘X/Y’ indicates to do action ‘X’
@@ -4843,7 +5697,7 @@ involved instructions. Read the manual [[http://plantuml.com/guide][here]].
 ;; Tell emacs where it is.
 ;; E.g., (async-shell-command "find / -name plantuml.jar")
 (setq org-plantuml-jar-path
-      (expand-file-name "/usr/local/Cellar/plantuml/1.2019.13/libexec/plantuml.jar"))
+      "/usr/local/Cellar/plantuml/1.2019.13/libexec/plantuml.jar")
 
 ;; Enable C-c C-c to generate diagrams from plantuml src blocks.
 (add-to-list 'org-babel-load-languages '(plantuml . t) )
@@ -4858,8 +5712,7 @@ involved instructions. Read the manual [[http://plantuml.com/guide][here]].
 Let's use this!
 # The source block is replaced with the generated image in-place, by default.
 # #+begin_src plantuml :file workflow.png :exports code :cache (progn (async-shell-command "cp workflow.png ~/alhassy.github.io/assets/img/") "yes")
-# begin_src plantuml :file workflow.png :exports code :cache yes :tangle no :results (and (org-display-inline-images t t) 'replace)
-#+begin_src plantuml :file workflow.png :tangle no :exports both :eval never-export
+#+begin_src plantuml :file images/workflow.png :tangle no :exports both :eval never-export :results replace
 skinparam defaultTextAlignment center  /' Text alignment '/
 
 skinparam titleBorderRoundCorner 15
@@ -4913,8 +5766,8 @@ center footer  ♥‿♥ Org-mode is so cool (•̀ᴗ•́)و
    or used a “header” instead.'/
 #+end_src
 
-#+RESULTS[be722b7f6a40cf685468918df82a3b22468e3d24]:
-[[file:workflow.png]]
+#+RESULTS:
+[[file:images/workflow.png]]
 
 # (org-display-inline-images t t)
 # (shell-command "rm workflow.png")
@@ -4945,12 +5798,20 @@ Of note:
 This particular workflow is inspired by [[http://doc.norang.ca/org-mode.html][Bernt Hansen]] ---while quickly searching
 through the PlantUML [[http://plantuml.com/guide][manual]]: The above is known as an “activity diagram” and
 it's covered in §4.
+
+Org-mode may be used with PlantUML:
++  See §11,12 for using Org-mode notation to form ‘mindmaps’ and ‘work breakdown
+  structures’.
+
++ Org-mode text formatters are also acknowledged but the delimiters must be
+  doubled; see §16.1.
+
+You can quickly write and see the resulting UMLs using
+https://liveuml.com/, for the most part.
+
 ** Clocking Work Time
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Clocking-Work-Time
 :END:
 
 Let's keep track of the time we spend working on tasks that we may have captured
@@ -4977,36 +5838,6 @@ clock-out and see how long it actually took.
 
 # To review the day’s accomplishments, type ‘l’
 # (org-agenda-log-mode) from the agenda view.
-
-Moreover, we can overlay due dates and priorities to tasks in a non-intrusive
-way that is easy to edit by hand.
-
-#+begin_src emacs-lisp
-;; List of all the files & directories where todo items can be found. Only one
-;; for now: My default notes file.
-(setq org-agenda-files (list org-default-notes-file))
-
-;; How many days ahead the default agenda view should look
-(setq org-agenda-ndays 7)
-
-;; How many days early a deadline item will begin showing up in your agenda list.
-(setq org-deadline-warning-days 14)
-
-;; In the agenda view, days that have no associated tasks will still have a line showing the date.
-(setq org-agenda-show-all-dates t)
-
-;; Scheduled items marked as complete will not show up in your agenda view.
-(setq org-agenda-skip-scheduled-if-done t)
-(setq org-agenda-skip-deadline-if-done  t)
-#+end_src
-
-The agenda view –--even in the 7-days-at-a-time view--– will always begin on the
-current day.  This is important, since while using org-mode as a day planner,
-you never want to think of days gone past. That’s something you do in other
-ways, such as when reviewing completed tasks.
-#+begin_src emacs-lisp
-(setq org-agenda-start-on-weekday nil)
-#+end_src
 
 Sometimes, at the beginning at least, I would accidentally invoke the transposed
 command ~C-x C-c~, which saves all buffers and quits Emacs. So here's a helpful
@@ -5044,10 +5875,7 @@ A few more settings:
 
 *** Finding tasks to clock in
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Finding-tasks-to-clock-in
 :END:
 Use one of the following options, with the top-most being the first to be tried.
 + From anywhere, ~C-u C-c C-x C-i~ yields a pop-up for recently clocked in tasks.
@@ -5062,16 +5890,24 @@ Use one of the following options, with the top-most being the first to be tried.
 
 *** Estimates versus actual time
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Estimates-versus-actual-time
 :END:
 Before clocking into a task, add to the properties drawer ~:Effort: 1:25~ or ~C-c
 C-x C-e~, for a task that you estimate will take an hour and twenty-five minutes,
 for example. Now the modeline will mention the time elapsed alongside the task
 name. *Woah!*
-+ This is also useful when you simply want to put a time limit on a task that
+
+#+begin_src emacs-lisp
+ (push '("Effort_ALL" . "0:15 0:30 0:45 1:00 2:00 3:00 4:00 5:00 6:00 0:00")
+       org-global-properties)
+#+end_src
+
+#+begin_quote org
+Use speed keys ~e/E~ to insert an effort estimate, with the above being provided
+  options, or to increment the current effort to the next one in the above list.
+#+end_quote
+
+This is also useful when you simply want to put a time limit on a task that
   wont be completed anytime soon, say writing a thesis or a long article, but
   you still want to work on it for an hour a day and be warned when you exceed
   such a time constraint.
@@ -5087,20 +5923,108 @@ name. *Woah!*
 
   When you've gone above your estimate time, the modeline colours it red.
 
+** Habit Formation
+
+/The/ reason to use habits is that they come with a graph indicating consistency
+by colour, and the goal of the game is to have [[https://lifehacker.com/jerry-seinfelds-productivity-secret-281626][the longest possible chain]] ---no
+red days!
+
+A ‘habit’ is a usual (recurring) todo task marked as a habit:
+Use =C-c C-x p= to set the =STYLE= property to =habit= on a task to set it as a habit.
+
+#+BEGIN_SRC emacs-lisp
+;; Show habits for every day in the agenda.
+(setq org-habit-show-habits t)
+(setq org-habit-show-habits-only-for-today nil)
+
+;; This shows the ‘Seinfeld consistency’ graph closer to the habit heading.
+(setq org-habit-graph-column 90)
+
+;; In order to see the habit graphs, which I've placed rightwards, let's
+;; always open org-agenda in ‘full screen’.
+;; (setq org-agenda-window-setup 'only-window)
+#+END_SRC
+
+| /inch by inch anything's a cinch!/ |
+
+~!~ means today and ~⋆~ means a task has been done on that day;
+intuitively green means you're on track, yellow is warning sign of overdue,
+red is overdue, and blue is an acceptable break day.
+
+Here's an example habit from the [[https://orgmode.org/manual/Tracking-your-habits.html][Org-mode manual]], where ~.+𝒳d/𝒴d~ reads
+/perform the habit once every 𝒳 days, but never let me go 𝒴 days without doing it./
+#+begin_example org
+,** TODO Shave
+   SCHEDULED: <2020-01-08 Wed .+2d/4d>
+   :PROPERTIES:
+   :STYLE:    habit
+   :END:
+#+end_example
+/Shave every 2 days, but we can take a 3-day break; however, on the 4th day,
+gotta shave!/
+
+Remember that in the agenda view if you alter a task, say with ~t~ to mark it
+done, then you need to use ~s~ to save the underlying todo/notes files; otherwise,
+any ~g~ will revert the change in the agenda buffer.
+
+** Actually Doing Things
+
+Let's setup a little audio-visual reminder to regularly check my agenda
+and ensure I'm not narrowing on a single task and ignoring others.
+#+begin_src emacs-lisp
+;; Obtain a notifications and text-to-speech utilities
+(system-packages-ensure "espeak") ;; Alternatively: espeak-ng supports 109 languages
+(system-packages-ensure "terminal-notifier") ;; MacOS specific
+
+(run-at-time
+ "09:00am"
+ (* 2 60 60) ;; Every two hours
+ (lambda ()
+   (shell-command
+    (format "%s"
+            '(terminal-notifier
+              -title    \"Check your agenda!\"
+              -subtitle \"Is what you\'re doing …\"
+              -message  \"… in alignment with your goals?\"
+              -sound t -appIcon ~/.emacs.d/images/emacs-logo.png
+              ;; Speak at a speed of 125 words per minute; ie slowed down.
+              & espeak -s 125 \"Maybe it\'s time to do another task?\")))))
+#+end_src
+
+By default, notifications are in banner style ---they go away automatically---
+we can use alert style ---in which they stay until dismissed--- in MacOS as
+follows: =System Preferences → Notifications → terminal-notifier → Alerts=.
+
++ [[https://emacs.stackexchange.com/questions/3844/good-methods-for-setting-up-alarms-audio-visual-triggered-by-org-mode-events][Here]] is an approach to triggering audio-visual alarms from Org-mode events
+  ---using ~org-agenda-to-appt~.
+
++ Emacs's built in [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Appointments.html][appointment notification facility]] can also be used as a alarm
+  clock via ~M-x appt-add~.
+
 * Programming
 :PROPERTIES:
-
+:CUSTOM_ID: Programming
 :END:
 
 Herein we configure utilites for version control, function and variable lookup,
 and template expansion for inescapably repetitive scenarios.
 
+** Which function are we writing?
+In the modeline, show the name of the function we're currently writing.
+#+BEGIN_SRC emacs-lisp
+(add-hook 'prog-mode-hook #'which-function-mode)
+(add-hook 'org-mode-hook  #'which-function-mode)
+#+END_SRC
+In Org-mode, this places the current heading in the modeline.
+
+In Lisp mode, ensure we always have matching parens.
+#+BEGIN_SRC emacs-lisp
+(add-hook 'emacs-lisp-mode-hook #'check-parens)
+#+END_SRC
+
 ** Highlight defined Lisp symbols
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Highlight-defined-Lisp-symbols
 :END:
 
 Usually Emacs only highlights macro names, the [[https://github.com/Fanael/highlight-defined][following]] incantation makes it
@@ -5117,33 +6041,29 @@ then I've misspelled it or it doesn't exist! :smile:
 
 ** Eldoc for Lisp and Haskell
 :PROPERTIES:
-
+:CUSTOM_ID: Eldoc-for-Lisp-and-Haskell
 :END:
-:PROPERTIES:
 
-:END:
-In =emacs-lisp-mode= we can enable =eldoc-mode= to display information
-about a function or a variable in the echo area. Likewise for Haskell.
+In =emacs-lisp-mode= we can enable =eldoc-mode= ---“Elisp Live Documentation”--- to
+display information about a function or a variable in the echo area. Likewise
+for Haskell.
 
 #+BEGIN_SRC emacs-lisp
-(add-hook 'emacs-lisp-mode-hook       'turn-on-eldoc-mode)
-(add-hook 'lisp-interaction-mode-hook 'turn-on-eldoc-mode)
-(add-hook 'haskell-mode-hook          'turn-on-haskell-doc-mode)
-(add-hook 'haskell-mode-hook          'turn-on-haskell-indent)
+(use-package eldoc
+  :diminish eldoc-mode
+  :hook (emacs-lisp-mode . turn-on-eldoc-mode)
+        (lisp-interaction-mode . turn-on-eldoc-mode)
+        (haskell-mode . turn-on-haskell-doc-mode)
+        (haskell-mode . turn-on-haskell-indent))
 #+END_SRC
 
 The less casual Haskeller would likely want to use [[https://haskell-lang.org/intero][intero]] to obtain
 more support; e.g., obtain suggestions from GHC about redundant imports
 or type signatures.
 
-The more
-
 ** Jumping to definitions & references
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Jumping-to-definitions-references
 :END:
 
 Out-of-the-box Emacs has ‘xref’ utilities ~M-.~ and ~C-u M-.~ to [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Xref.html#Xref][Find Identifier
@@ -5176,32 +6096,44 @@ variable ---the first is likely what is desired.  Alternatively, one could just
 add the necessary rule to the variable =dumb-jump-find-rules=.  Otherwise, it
 works fine even for locally bound definitions.  It works depending on the
 extension of a file.
-** Aggressive Indentation
-:PROPERTIES:
+** Version Control with SVN ---Using Magit!
 
-:END:
-:PROPERTIES:
+Let's use git as an interface to subversion repositories so that we can continue
+to use =magit= as our version control interface.  The utility to do so is called
+=git svn= ---note =git 𝒳= on a MacOS is the same as =git-𝒳= on other systems.
 
-:END:
+#+begin_src emacs-lisp
+(use-package magit-svn
+  :hook (magit-mode . magit-svn-mode))
+#+end_src
 
-With a single space or tab, my code should always remain indented.
-#+BEGIN_SRC emacs-lisp
-;; Always stay indented: Automatically have blocks reindented after every change.
-(use-package aggressive-indent
-  :config (global-aggressive-indent-mode t))
+Here's an example. The following command checksout an SVN repo; afterwhich we may open a file
+there and do =M-x magit-status= to get the expected porcelain git interface  ^_^
+#+begin_src emacs-lisp :tangle no
+(async-shell-command "mkdir ~/2fa3; git svn clone --username alhassm https://websvn.mcmaster.ca/csse2fa3/2019-2020_Term2 ~/2fa3/")
+#+end_src
 
-;; Use 4 spaces in places of tabs when indenting.
-(setq-default indent-tabs-mode nil)
-(setq-default tab-width 4)
-#+END_SRC
+In the magit buffer, we may now use the ~N~ key which wraps the =git svn=
+subcommands =fetch, rebase, dcommit, branch, tag=. For example:
+
+1. Make changes to a file.
+2. ‘Stage’ them with ~s~ and ‘commit’ them with ~c~.
+3. ‘Push’ changes with ~N c~.
+
+We get to pretend we're using ~git~ even though the underlying mechanism is ~svn~!
+# Indeed, in a terminal ~git svn log~ will show an ~svn~ log with single pushed commits.
+
+For move on =git svn=, see [[https://gist.github.com/rickyah/7bc2de953ce42ba07116][A simple guide to git-svn]] or [[https://www.viget.com/articles/effectively-using-git-with-subversion/][Effectively using Git
+  with Subversion]].
+
+⟨ If I need to work with svn repos often enough, I'd extend my ~maybe-clone~
+  utility above to account for them. ⟩
 
 ** What's changed & who's to blame?
 :PROPERTIES:
-
+:CUSTOM_ID: What's-changed-who's-to-blame
 :END:
-:PROPERTIES:
 
-:END:
 Let's have, in a fringe, an indicator for altered regions in a version
 controlled file.  The symbols “+, =” appear in a fringe by default for
 alterations ---we may change these if we like.
@@ -5245,14 +6177,14 @@ A few more helpful version control features:
 #+BEGIN_SRC emacs-lisp
 ;; Popup for who's to blame for alterations.
 (use-package git-messenger
-  :config ;; Always show who authored the commit and when.
-          (setq git-messenger:show-detail t)
+  :custom ;; Always show who authored the commit and when.
+          (git-messenger:show-detail t)
           ;; Message menu let's us use magit diff to see the commit change.
-          (setq git-messenger:use-magit-popup t))
+          (git-messenger:use-magit-popup t))
 
 ;; View current file in browser on github.
 ;; More generic is “browse-at-remote”.
-(use-package github-browse-file)
+(use-package github-browse-file :defer t)
 
 ;; Add these to the version control hydra.
 ;;
@@ -5270,7 +6202,7 @@ Obtaining URL links to the current location of a file
 Usefully, if [[https://gitlab.com/pidu/git-timemachine][git-timemachine-mode]] is active, the generated link
 points to the version of the file being visited.
 #+BEGIN_SRC emacs-lisp
-(use-package git-link)
+(use-package git-link :defer t)
 
 (defhydra hydra-version-control (global-map "C-x v")
   ("l" git-link "Git URL for current location"))
@@ -5280,23 +6212,35 @@ Read [[https://www.gnu.org/software/emacs/manual/html_node/emacs/Version-Control
 
 ** Highlighting TODO-s & Showing them in Magit
 :PROPERTIES:
-
+:CUSTOM_ID: Highlighting-TODO-s-Showing-them-in-Magit
 :END:
-:PROPERTIES:
 
-:END:
 Basic support todos. By default these include: TODO NEXT THEM PROG OKAY DONT
 FAIL DONE NOTE KLUDGE HACK TEMP FIXME and any sequence of X's or ?'s of length
 at least 3: XXX, XXXX, XXXXX, …, ???, ????, ????, ….
 #+BEGIN_SRC emacs-lisp
 ;; NOTE that the highlighting works even in comments.
 (use-package hl-todo
-  :init (global-hl-todo-mode)   ;; Enable it everywhere.
+  ;; I want todo-words highlighted in prose, not just in code fragements.
+  ;; :hook (org-mode . hl-todo-mode)
   :config
-  ;; Adding new keywords
-  (loop for kw in '("TEST" "MA" "WK" "JC")
-        do (add-to-list 'hl-todo-keyword-faces (cons kw "#dc8cc3"))))
+    ;; Adding new keywords
+    (loop for kw in '("TEST" "MA" "WK" "JC")
+          do (add-to-list 'hl-todo-keyword-faces (cons kw "#dc8cc3")))
+    (global-hl-todo-mode))   ;; Enable it everywhere.
 #+END_SRC
+
+:Alternate_approach_using_font_lock:
+#+begin_src emacs-lisp
+(defun add-watchwords () "Add TODO: words to font-lock keywords."
+  (font-lock-add-keywords nil
+                          '(("\\(\\<TODO\\|\\<FIXME\\|\\<HACK\\|@.+\\):" 1
+                             font-lock-warning-face t))))
+
+(add-hook 'prog-mode-hook #'add-watchwords)
+
+#+end_src
+:End:
 
 Lest these get buried in mountains of text, let's have them [[https://github.com/alphapapa/magit-todos][become
 mentioned]] in a magit status buffer ---which uses the keywords from ~hl-todo~.
@@ -5305,6 +6249,7 @@ mentioned]] in a magit status buffer ---which uses the keywords from ~hl-todo~.
 (use-package magit-todos
   :after magit
   :after hl-todo
+  :hook (org-mode . magit-todos-mode)
   :config
   ;; For some reason cannot use :custom with this package.
   (custom-set-variables
@@ -5333,12 +6278,37 @@ Add these to the version control hydra.
   ("t" helm-magit-todos "Show TODOs lists for this repo."))
 #+END_SRC
 
+** Aggressive Indentation
+:PROPERTIES:
+:CUSTOM_ID: Aggressive-Indentation
+:END:
+
+With a single space or tab, my code should always remain indented.
+#+BEGIN_SRC emacs-lisp
+;; Always stay indented: Automatically have blocks reindented after every change.
+(use-package aggressive-indent
+  :config (global-aggressive-indent-mode t))
+
+;; Use 4 spaces in places of tabs when indenting.
+(setq-default indent-tabs-mode nil)
+(setq-default tab-width 4)
+#+END_SRC
+
+** Being Generous with Whitespace
+The following minor mode automatically adds spacing around operators.
+#+begin_src emacs-lisp
+(use-package electric-operator
+  :diminish
+  :hook (c-mode . electric-operator-mode))
+#+end_src
+
+I dislike it when users write ~x=y+1~ ---whitespace is free and helpful.  ⟨ Also,
+languages with arbitrary identifiers, like Lisp and Agda, would accept ~x=y+1~ as
+an identifier, not an expression! ⟩
+
 ** On the fly syntax checking
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: On-the-fly-syntax-checking
 :END:
 
 [[https://www.flycheck.org/en/latest/][Flycheck]] is a on-the-fly syntax checker that relies on external programs to
@@ -5397,10 +6367,7 @@ Try it out:
 
 ** Coding with a Fruit Salad: Semantic Highlighting
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Coding-with-a-Fruit-Salad-Semantic-Highlighting
 :END:
 
 What should be highlighted when we write code? Static keywords with fixed uses,
@@ -5432,6 +6399,8 @@ For Emacs, [[https://github.com/ankurdave/color-identifiers-mode][Color Identifi
 #+begin_src emacs-lisp
 (use-package color-identifiers-mode
   :config (global-color-identifiers-mode))
+
+;; Sometimes just invoke: M-x color-identifiers:refresh
 #+END_SRC
 
 When writing a new name, after about ~5 seconds it obtains a colour which is then
@@ -5451,27 +6420,20 @@ Here are further reads:
   - [[https://github.com/jacksonrayhamilton/context-coloring][Colouring by Context]] ---an Emacs package
   - [[http://www.linusakesson.net/programming/syntaxhighlighting/][A case against syntax highlighting]]
 
-** Text Folding with [[https://github.com/gregsexton/origami.el][Origami-mode]]
-:PROPERTIES:
-
-:END:
-:PROPERTIES:
-
-:END:
-
+** Text Folding with Origami-mode
 Literate programming within Org-mode is not always ideal, so we use a
 programming mode directly and then may want to have arbitrary ‘sections’ of text
 folded up.  Let's describe how to accomplish this goal.
 
-We use a feature-full folding mode.
+We use a feature-full folding mode,  [[https://github.com/gregsexton/origami.el][Origami-mode]].
 #+BEGIN_SRC emacs-lisp
-(use-package origami)
-#+END_SRC
-
-With basic support for one of my languages.
-#+BEGIN_SRC emacs-lisp
-(push (cons 'agda2-mode (origami-markers-parser "{-" "-}"))
-      origami-parser-alist)
+(use-package origami
+  ;; In Lisp languages, by default only function definitions are folded.
+  :hook ((agda2-mode lisp-mode c-mode) . origami-mode)
+  :config
+  ;; With basic support for one of my languages.
+  (push '(agda2-mode . (origami-markers-parser "{-" "-}"))
+         origami-parser-alist))
 #+END_SRC
 
 With expected support for searching.
@@ -5499,10 +6461,7 @@ blocks! Love this one ^_^
 
 ** Jump between windows using Cmd+Arrow & between recent buffers with Meta-Tab
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Jump-between-windows-using-Cmd-Arrow-between-recent-buffers-with-Meta-Tab
 :END:
 We can use ~C-x o~ to switch to the ‘o’ther window, and ~C-u 𝓃 C-x o~ to switch to
 the 𝓃-th next clockwise window, but using ~s-↑,↓,←,→~ may be faster.
@@ -5535,10 +6494,7 @@ into new configurations.
 
 ** Snippets ---Template Expansion
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Snippets-Template-Expansion
 :END:
 
 It is common that there is a sequence of text that we tend to repeat
@@ -5546,6 +6502,8 @@ often, possibly with a name or some other parameter altered.
 Such a ‘snippet’ could be written once then provided by a simple
 Lisp insert command with the parameters being queried. Luckily, others
 have written such pleasant utilities.
+
+*** Intro :ignore:
 
 [[http://joaotavora.github.io/yasnippet/snippet-development.html][Yasnippet]] is a pleasant utility for template expansion with the alluring
 feature to allow arbitrary Lisp code to be executed during expansion.
@@ -5624,7 +6582,7 @@ I have the expected habit of copying a URL from someplace then forming
 a link to it by writing ~[[URL] [description]]~, since the URL & syntax are already
 known, let's expand those and place the cursour at the only unknown ---the description.
 #+begin_src org :tangle "~/.emacs.d/yankpad.org" :comments none
-,** my-org-insert-link: cleverly insert a link copied to clipboard
+,** my_org_insert_link: cleverly insert a link copied to clipboard
  [[${1:`(clipboard-yank)`}][$2]] $0
 #+end_src
 
@@ -5662,9 +6620,11 @@ Let's overwrite the usual way to insert such links, via ~C-c C-l~.
   This overrides Org-mode's built-in ‘org-insert-link’ utility;
   whence C-c C-l uses the snippet."
   (interactive)
-  (insert "my-org-insert-link")
+  (insert "my_org_insert_link")
   (yankpad-expand))
 #+END_SRC
+
+/Warning!/ Snippet names cannot have hypens in them ---in this setup at least.
 
 The [[http://joaotavora.github.io/yasnippet/snippet-development.html][Yasnippet manual]] is an accessible read, as is the [[https://github.com/Kungsgeten/yankpad][Yankpad manual]], and
  showcases many other utilities; such as having certain snippets being
@@ -5682,10 +6642,7 @@ concluding with actually loading this snippet mechanism globally.
 
 *** Org-mode Templates ---A reason I “generate” templates ;)
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Org-mode-Templates-A-reason-I-generate-templates
 :END:
 
 This produces a pop-up list of org-mode block types, if ~src~ is selected, then a
@@ -5791,11 +6748,9 @@ levels, then uses each level to produce a list of type names ;-)
 
 *** Elisp Templates
 :PROPERTIES:
-
+:CUSTOM_ID: Elisp-Templates
 :END:
-:PROPERTIES:
 
-:END:
 The following snippets were rather useful as I began learning Lisp to construct
 my editor of choice ---I love Emacs so much. Admittedly, I still need the first
 one below and usually beat around the bush by using ~(loop for ⋯ do ⋯)~, which is
@@ -5819,10 +6774,7 @@ one below and usually beat around the bush by using ~(loop for ⋯ do ⋯)~, whi
 
 *** Equational Templates
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Equational-Templates
 :END:
 
 To show ~ℒ = ℛ~, one starts at the complicated side, say /ℒ/, then, with the aim of
@@ -5855,11 +6807,9 @@ One expands ~eqn_begin~, tabs to fill in the three main locations, then
 
 *** COMMENT Misc Templates
 :PROPERTIES:
-
+:CUSTOM_ID: COMMENT-Misc-Templates
 :END:
-:PROPERTIES:
 
-:END:
 #+begin_src org :tangle "~/.emacs.d/yankpad.org"  :comments none
 ,** remark: top-level literate comment
 
@@ -5868,13 +6818,60 @@ One expands ~eqn_begin~, tabs to fill in the three main locations, then
 
 Where my local use contains ~#+MACRO: remark  @@latex: \fbox{\textbf{Comment: $1 }}@@~.
 
+*** =my_⋯= Templates to obtain User Information
+
+Let's add templates for links to common user information ^_^
+
+#+begin_src org :tangle "~/.emacs.d/yankpad.org"  :comments none
+,** my_name: User's name
+`user-full-name`
+
+,** my_email: User's email address
+`user-mail-address`
+
+,** my_github: User's Github repoistory link
+https://github.com/alhassy/
+
+,** my_emacsdrepo: User's version controlled Emacs init file
+https://github.com/alhassy/emacs.d
+
+,** my_blog: User's blog website
+https://alhassy.github.io/
+
+,** my_webpage: User's organisation website
+http://www.cas.mcmaster.ca/~alhassm/
+
+,** my_twitter: User's Twitter profile
+https://twitter.com/musa314
+
+,** my_masters_thesis
+A Mechanisation of Internal Galois Connections In Order Theory Formalised Without Meets
+https://macsphere.mcmaster.ca/bitstream/11375/17276/2/thesis.pdf
+#+end_src
+
+It may be useful to also have Org-link variants of these …
+
+*** Templates from other places in my init
+
+In this setup, I have some templates appear elsewhere, tagged with =:noweb-ref
+templates-from-other-places-in-my-init=. They are presented in natural positions,
+but can only occur to the machine after template expansion is setup.  Using
+org-mode, we are able to /present/ code in any order and /tangle/ it to the order
+the compilers need it to be!
+
+Let's activate all such templates, now after template expansion has been setup.
+#+BEGIN_SRC org :tangle "~/.emacs.d/yankpad.org" :comments none :noweb yes
+<<templates-from-other-places-in-my-init>>
+#+END_SRC
+
+Note: Since I've insisted that Org blocks are space sensative, any whitespace
+before the ~<<⋯>>~ will propogate to the resulting extracted code.
+
 *** Re-Enabling Templates
 :PROPERTIES:
-
+:CUSTOM_ID: Re-Enabling-Templates
 :END:
-:PROPERTIES:
 
-:END:
 After our yankpad templates are generated, we need to load it.
 #+BEGIN_SRC emacs-lisp
 ;; After init hook; see above near use-package install.
@@ -5882,7 +6879,7 @@ After our yankpad templates are generated, we need to load it.
 #+END_SRC
 * Helpful Utilities & Shortcuts
 :PROPERTIES:
-
+:CUSTOM_ID: Helpful-Utilities-Shortcuts
 :END:
 
 Here is a collection of Emacs-lisp functions that I have come to use in other files.
@@ -5902,11 +6899,9 @@ Let's save a few precious seconds,
 
 ** Documentation Pop-Ups
 :PROPERTIES:
-
+:CUSTOM_ID: Documentation-Pop-Ups
 :END:
-:PROPERTIES:
 
-:END:
 Let [[https://github.com/expez/company-quickhelp][documentation pop-up]] when we pause on a completion.
 This is very useful when editing in a particular coding language, say via
 ~C-c '~ for org-src blocks.
@@ -5918,11 +6913,9 @@ This is very useful when editing in a particular coding language, say via
 #+END_SRC
 ** Emacs keybindings for my browser :Disabled:
 :PROPERTIES:
-
+:CUSTOM_ID: Emacs-keybindings-for-my-browser
 :END:
-:PROPERTIES:
 
-:END:
 #+begin_center
 ⟨ I was a bit too Emacs-happy at one-point; this' cool, but I rarely use it;
 except ~C-x b~: A buffer approach is far superior to a tab-based one. ⟩
@@ -5935,10 +6928,7 @@ can be used to navigate my browser ^_^
 
 ** Using Emacs in any text area on my OS                          :Disabled:
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Using-Emacs-in-any-text-area-on-my-OS
 :END:
 
 #+begin_center
@@ -5980,11 +6970,9 @@ I always want to be in Org-mode and input unicode:
 
 ** Reload buffer with ~f5~
 :PROPERTIES:
-
+:CUSTOM_ID: Reload-buffer-with-f5
 :END:
-:PROPERTIES:
 
-:END:
 I do this so often it's not even funny.
 #+BEGIN_SRC emacs-lisp
 (global-set-key [f5] '(lambda () (interactive) (revert-buffer nil t nil)))
@@ -6008,10 +6996,7 @@ were regenerated --Emacs should also prompt me if I make any changes!
 
 ** Kill to start of line
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Kill-to-start-of-line
 :END:
 Dual to ~C-k~,
 #+BEGIN_SRC emacs-lisp
@@ -6020,10 +7005,7 @@ Dual to ~C-k~,
 #+END_SRC
 ** Killing buffers & windows: ~C-x k~ has a family
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Killing-buffers-windows-C-x-k-has-a-family
 :END:
 
 Let's extend the standard ~C-x k~ with prefix support, so that we can invoke
@@ -6060,16 +7042,14 @@ I tend to consult.
 
 ** Switching from 2 horizontal windows to 2 vertical windows
 :PROPERTIES:
-
+:CUSTOM_ID: Switching-from-2-horizontal-windows-to-2-vertical-windows
 :END:
-:PROPERTIES:
 
-:END:
 I often find myself switching from a horizontal view of two windows in Emacs to a
 vertical view. This requires a variation of ~C-x 1 RET C-x 3 RET C-x o C-x b RET~.
 Instead I now only need to type ~C-|~ to make this switch.
 #+BEGIN_SRC emacs-lisp
-(defun ensure-two-vertical-windows ()
+(defun my/ensure-two-vertical-windows ()
   "I used this method often when programming in Coq.
 
 When there are two vertical windows, this method ensures the left-most
@@ -6083,14 +7063,11 @@ window contains the buffer with the cursour in it."
     (switch-to-buffer otherBuffer)	;; C-x b RET
     (other-window 1)))
 
-(global-set-key (kbd "C-|") 'ensure-two-vertical-windows)
+(global-set-key (kbd "C-|") 'my/ensure-two-vertical-windows)
 #+END_SRC
 ** Obtaining Values of ~#+KEYWORD~ Annotations
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Obtaining-Values-of-KEYWORD-Annotations
 :END:
 
 Org-mode settings are, for the most part, in the form ~#+KEYWORD: VALUE~. Of notable interest
@@ -6119,10 +7096,7 @@ and how to manipulate it.
 
 ** Publishing articles to my personal blog
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Publishing-articles-to-my-personal-blog
 :END:
 
 I try to [[https://alhassy.github.io/][blog]] occasionally, so here's a helpful function to quickly
@@ -6166,7 +7140,7 @@ publish the current article to my blog.
 
 * Conclusion ---Why Configuration Files Should be Literate
 :PROPERTIES:
-
+:CUSTOM_ID: Conclusion-Why-Configuration-Files-Should-be-Literate
 :END:
 
 A configuration file sets up various features for a tool ---and serves as an
@@ -6284,11 +7258,11 @@ Bye!
 
 --------------------------------------------------------------------------------
 
-#+HTML: ![Image-Being-replaced-at-the-office](https://i.redd.it/g6yi40gbivv31.jpg)
+#+HTML: <p align="center"><img src="https://i.redd.it/g6yi40gbivv31.jpg"  alt="Being replaced at the office"/></p>
 
 * COMMENT Approaches Before Reading Documentation :Documentation:Posterity:Learning:noexport:
 :PROPERTIES:
-
+:CUSTOM_ID: COMMENT-Approaches-Before-Reading-Documentation
 :END:
 
 ;; Nice soft yellow, pleasing ---try background colour for html export ;-)
@@ -6297,10 +7271,7 @@ Bye!
 
 ** Elementary Version Control
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Elementary-Version-Control
 :END:
 
 [[http://www.linfo.org/hard_link.html][Soft links]] are pointers to other filenames, whereas hardlinks
@@ -6365,11 +7336,9 @@ Finally, since I've symlinked my ~.emacs~:
 #+end_src
 ** What's in, or at the top of, my ~~/.emacs~
 :PROPERTIES:
-
+:CUSTOM_ID: What's-in-or-at-the-top-of-my-emacs
 :END:
-:PROPERTIES:
 
-:END:
 #+BEGIN_SRC emacs-lisp :tangle no
 (org-babel-load-file "~/.emacs.d/init.org")
 ;;
@@ -6394,11 +7363,9 @@ would tangle it producing the ~init.el~ file which will then be loaded immediate
 :End:
 ** README.md
 :PROPERTIES:
-
+:CUSTOM_ID: README-md
 :END:
-:PROPERTIES:
 
-:END:
 #+BEGIN_SRC emacs-lisp :tangle no :export_never t
 (with-temp-buffer
     (insert (concat
@@ -6444,11 +7411,9 @@ would tangle it producing the ~init.el~ file which will then be loaded immediate
 
 ** List recently accessed files upon startup
 :PROPERTIES:
-
+:CUSTOM_ID: List-recently-accessed-files-upon-startup
 :END:
-:PROPERTIES:
 
-:END:
 #+BEGIN_SRC emacs-lisp :tangle no
 (recentf-mode 1)                   ;; Part of Emacs
 (setq recentf-max-menu-items 25)
@@ -6461,11 +7426,9 @@ would tangle it producing the ~init.el~ file which will then be loaded immediate
 
 ** Homemade attempt before learning about shell-pop
 :PROPERTIES:
-
+:CUSTOM_ID: Homemade-attempt-before-learning-about-shell-pop
 :END:
-:PROPERTIES:
 
-:END:
 #+begin_src emacs-lisp :tangle no
 (cl-defun toggle-terminal (&optional (name "*eshell-pop-up*"))
    "Pop up a terminal, do some work, then close it using the same command.
@@ -6488,10 +7451,7 @@ would tangle it producing the ~init.el~ file which will then be loaded immediate
 #+end_src
 ** Exporting Tables to CSV :Documentation:
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Exporting-Tables-to-CSV
 :END:
 
 Org-mode can export tables as TAB or comma delimited formats. I set the default format to CSV with:
@@ -6502,11 +7462,9 @@ Exporting to CSV format is the only one I use and this provides the default so I
 To export the following table I put the cursor inside the table and hit M-x org-table-export which prompts for a filename and the format which defaults to orgtbl-to-csv from the setting above.
 ** Interpret the Haskell source blocks in a file :Cool_but_have_not_used_this_in_some_time:
 :PROPERTIES:
-
+:CUSTOM_ID: Interpret-the-Haskell-source-blocks-in-a-file
 :END:
-:PROPERTIES:
 
-:END:
 #+BEGIN_SRC emacs-lisp
 (defvar *current-module* "NoModuleNameSpecified"
   "The name of the module, file, that source blocks are
@@ -6569,10 +7527,7 @@ To export the following table I put the cursor inside the table and hit M-x org-
 #+END_SRC
 ** Makeshift HTML Folded Drawers: Folding-mode & Org-Macros
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Makeshift-HTML-Folded-Drawers-Folding-mode-Org-Macros
 :END:
 
 My =my/prettify-alist= has the following:
@@ -6622,11 +7577,9 @@ with show/hide with ~C-<tab>~ key.
 
 ** Default Compilation Commands ---Local Variables
 :PROPERTIES:
-
+:CUSTOM_ID: Default-Compilation-Commands-Local-Variables
 :END:
-:PROPERTIES:
 
-:END:
 
 Emacs' [[https://www.emacswiki.org/emacs/CompileCommand][compile]] command allows us to execute arbitrary Elisp
 when ~M-x recompile~ is invoked. One of my habits is to append
@@ -6670,11 +7623,9 @@ Let's remove repeated matter.
 #+END_SRC
 ** Keeping my system up to date
 :PROPERTIES:
-
+:CUSTOM_ID: Keeping-my-system-up-to-date
 :END:
-:PROPERTIES:
 
-:END:
 Let's ensure our system is always up to date.
 #+BEGIN_SRC emacs-lisp
 (defun my/stay-up-to-date ()
@@ -6706,16 +7657,14 @@ May need to actually reboot the system as well.
 :End:
 * TODO COMMENT Improvements                                                :noexport:
 :PROPERTIES:
-
+:CUSTOM_ID: COMMENT-Improvements
 :END:
 
 ** Learn about TRAMP & Edit as Root
 :PROPERTIES:
-
+:CUSTOM_ID: Learn-about-TRAMP-Edit-as-Root
 :END:
-:PROPERTIES:
 
-:END:
 From an [[http://emacs-fu.blogspot.com/2013/03/editing-with-root-privileges-once-more.html][emacs-fu blog post]].
 #+BEGIN_SRC emacs-lisp
 (defun find-file-as-root ()
@@ -6734,10 +7683,7 @@ by user."
 Incidentally, TRAMP allows us to do the same thing.
 ** Easy tasks
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Easy-tasks
 :END:
 
 # TODO: MA: ⇨ Add unit tests for the init file.
@@ -6770,10 +7716,7 @@ Incidentally, TRAMP allows us to do the same thing.
 + [ ] Consider moving emots, such as \csi and \whyme, into yassnipets.
 ** Smartparens
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Smartparens
 :END:
 
 :PROPERTIES:
@@ -6852,10 +7795,7 @@ a [x y z] b  ⟶“M-) inside [⋯]”⟶  [a x y z] b
 #+end_example
 ** Macros
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Macros
 :END:
 
 Here's a neat macro I made, but I /may/ avoid using it in the init in order to
@@ -6898,32 +7838,16 @@ avoid scaring anyone. I may use it in my personal stuff.
 
 ** Summary of Utilities Provided
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Summary-of-Utilities-Provided
 :END:
 
 | _Command_                                | _Action_                                                |
-| ~C-c C-m~                                | recompile file                                          |
 | ~<f5>~                                   | revert buffer                                           |
-| ~M-x k~                                  | kill to start of line                                   |
 | ~C-∣~                                    | toggle 2 windows from horizontal to vertical view       |
-| ~(file-as-list   pathHere)~              | construe a file as a list of lines                      |
-| ~(file-as-string pathHere)~              | construe a file as a string                             |
-| (~re-replace-in-file file regex whatDo)~ | perform an in-file regular expression rewrite           |
-| ~(mapsto this that)~                     | regex rewrite in current buffer: this ↦ that            |
 | ~M-x create-scratch-buffer~              | --self evident--                                        |
-| ~M-x kill-other-buffers~                 | --self evident--                                        |
 | ~M-$~                                    | check spelling of word at point                         |
 | ~M-#~                                    | thesaurus look-up word at point                         |
-| ~(my/org-run-haskell &optional file)~    | Interpret the Haskell org-blocks from a file into ghci. |
 | ~C-+/-~                                  | increase/decrease text size                             |
-| ~M-x my-org-html-export-to-html~         | make then open html from an org file                    |
-| ~C-c C-c~                                | execute code in an org ~src~ block                      |
-| ~<E~                                     | produce an emacs-lisp ~src~ block                       |
-| ~<g~                                     | produce a graph template ~src~ block                    |
-| ~C-x t~                                  | open a new untitled org template file                   |
 | ~(org-keywords)~                         | get ~#+Property: Value~ pairs from an org file          |
 | ~(org-keyword property)~                 | get the ~value~ of a given org ~#+property~             |
 
@@ -6947,18 +7871,13 @@ Finally, we can observe which features are active in our current Emacs with,
 # List of installed packages: (mapcar 'car package-alist)
 ** Stuff I don't really use, but may want to look at later
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Stuff-I-don't-really-use-but-may-want-to-look-at-later
 :END:
 *** hooks and things for literate agda with org-agda
 :PROPERTIES:
-
+:CUSTOM_ID: hooks-and-things-for-literate-agda-with-org-agda
 :END:
-:PROPERTIES:
 
-:END:
 #+BEGIN_SRC emacs-lisp  :tangle no
 ;; not needed
 (defun lagda-extension-whatdo ()
@@ -6977,10 +7896,7 @@ Finally, we can observe which features are active in our current Emacs with,
 #+END_SRC
 *** floating toc material                            :no_longer_using_this:
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: floating-toc-material
 :END:
 
 Add the following to a web-page if you'd like it to have a floating table of contents.
@@ -6999,11 +7915,9 @@ Add the following to a web-page if you'd like it to have a floating table of con
 
 *** org-html-postamble-format
 :PROPERTIES:
-
+:CUSTOM_ID: org-html-postamble-format
 :END:
-:PROPERTIES:
 
-:END:
  Look at the super short doc to know how to manipulate this variable.
  (describe-symbol 'org-html-postamble-format)
 
@@ -7023,10 +7937,7 @@ Add the following to a web-page if you'd like it to have a floating table of con
  #+END_SRC
 *** to-consider-for-magit-list-repositories
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: to-consider-for-magit-list-repositories
 :END:
 
 The above mechanism suffices, the following needn't be followed with ... unless desired
@@ -7077,18 +7988,14 @@ The above mechanism suffices, the following needn't be followed with ... unless 
 
 *** Programming Language Support                                     :TODO:
 :PROPERTIES:
-
+:CUSTOM_ID: Programming-Language-Support
 :END:
-:PROPERTIES:
 
-:END:
 ***** Haskell :tangle no
 :PROPERTIES:
-
+:CUSTOM_ID: Haskell-tangle-no
 :END:
-:PROPERTIES:
 
-:END:
 #+BEGIN_SRC emacs-lisp
 ;; now C-c C-l interpets the current buffer; will ofcourse need to switch to the ghci buffer
  (add-hook 'haskell-mode-hook 'interactive-haskell-mode)
@@ -7096,43 +8003,18 @@ The above mechanism suffices, the following needn't be followed with ... unless 
 
 ***** Lambda Prolog
 :PROPERTIES:
-
+:CUSTOM_ID: Lambda-Prolog
 :END:
-:PROPERTIES:
 
-:END:
 #+BEGIN_SRC emacs-lisp  :tangle no
 (load "/usr/local/packages/teyjus/emacs/teyjus.el")
 (setq tjcc "/usr/local/packages/teyjus/tjcc")
 #+END_SRC
-***** intero and haskell
+***** Coq Support
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Coq-Support
 :END:
 
-  ;; ;;; To get completions in the REPL
-  ;; (add-hook 'haskell-interactive-mode-hook 'company-mode)
-
-  (require 'intero)
-  (add-hook 'haskell-mode-hook 'intero-mode)
-  (add-hook 'literate-haskell-mode-hook 'intero-mode)
-  ;; needed to fix bug when loading stack ghci for > 8.2
-  (setq haskell-process-args-ghci
-        '("-ferror-spans" "-fshow-loaded-modules"))
-
-  (setq haskell-process-args-cabal-repl
-        '("--ghc-options=-ferror-spans -fshow-loaded-modules"))
-
-**** Coq Support
-:PROPERTIES:
-
-:END:
-:PROPERTIES:
-
-:END:
 Sometimes I use Coq,
 #+begin_src emacs-lisp
 ;; Open .v files with Proof General's Coq mode
@@ -7141,10 +8023,7 @@ Sometimes I use Coq,
 
 *** Column Marker
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Column-Marker
 :END:
 
 (  Maybe a hook would be better? Much better...? )
@@ -7164,12 +8043,7 @@ thereby prompting ~my-org-html-export-to-html~ below to
 take care of this.
 
 *** theme magic
-:PROPERTIES:
 
-:END:
-:PROPERTIES:
-
-:END:
 [[https://github.com/jcaw/theme-magic][Theme-magic]] looks nice, in theory, but I've not found it to be useful, for me.
 #+BEGIN_SRC emacs-lisp :tangle no
 ;; Automatically propagate Emacs theme changes to OS
@@ -7180,10 +8054,7 @@ take care of this.
 
 ** Referencing Text From Code Blocks ---Attaching prose as doc strings :noexport:ignore:
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Referencing-Text-From-Code-Blocks-Attaching-prose-as-doc-strings
 :END:
 
 Sources:
@@ -7237,6 +8108,9 @@ Let's make ~get-named-text~ a globally defined and callable code block:
 
 ***  COMMENT Example
 :PROPERTIES:
+:CUSTOM_ID: COMMENT-Example
+:END:
+:PROPERTIES:
 
 :END:
 :PROPERTIES:
@@ -7265,11 +8139,9 @@ We use the XXX function add to calculate the sum of two numbers.
 + There is a reason we only support two args
 ** Tangeling to multiple files
 :PROPERTIES:
-
+:CUSTOM_ID: Tangeling-to-multiple-files
 :END:
-:PROPERTIES:
 
-:END:
 From https://emacs.stackexchange.com/questions/39032/tangle-the-same-src-block-to-different-files,
 
 #+begin_src emacs-lisp :tangle no
@@ -7337,16 +8209,16 @@ If the :tangle header arg is a list of files. Handle all files"
 #+end_src
 ** Parallel
 :PROPERTIES:
-
-:END:
-:PROPERTIES:
-
+:CUSTOM_ID: Parallel
 :END:
 
 #+BEGIN_SRC emacs-lisp :tangle no
 (add-to-list 'org-structure-template-alist '("p" . "parallel latex"))
 #+END_SRC
 * COMMENT footer & pushing to blog                                         :noexport:
+:PROPERTIES:
+:CUSTOM_ID: COMMENT-footer-pushing-to-blog
+:END:
 
 (emacs-restart)
 
